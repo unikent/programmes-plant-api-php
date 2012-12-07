@@ -24,5 +24,26 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 	{
 		$pp = new PP();
 	}
+
+	public function testSetProxyForCURLWithoutPortPortIs3128()
+	{
+		$pp = new PP('http://example.com');
+		$pp->set_proxy('http://proxy.example.com');
+
+		$this->assertEquals('http://proxy.example.com', $pp->proxy_server);
+		$this->assertEquals(3128, $pp->proxy_port);
+		$this->assertTrue($pp->proxy);
+	}
+
+	public function testSetProxyPortForCURL()
+	{
+		$pp = new PP('http://example.com');
+		$pp->set_proxy('http://proxy.example.com', 8000);
+
+		$this->assertEquals('http://proxy.example.com', $pp->proxy_server);
+		$this->assertEquals(8000, $pp->proxy_port);
+		$this->assertTrue($pp->proxy);
+	}
+
 }
 
