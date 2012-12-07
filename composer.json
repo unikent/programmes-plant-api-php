@@ -1,0 +1,12 @@
+{
+    "require": {
+    	"phpunit/phpunit": "*",
+        "mockery/mockery": ">=0.7.2"
+    },
+
+    "minimum-stability": "dev",
+    
+    "config": {
+        "bin-dir": "bin/"
+    }
+}
