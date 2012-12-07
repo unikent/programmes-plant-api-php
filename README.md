@@ -1,4 +1,4 @@
-programmes-plant-api-php
+Programmes Plant API
 ========================
 
-A PHP library for interacting with the Programmes Plant REST API.
+A PHP library for interacting with the [Programmes Plant](http://github.com/unikent/programmes-plant) REST API.
