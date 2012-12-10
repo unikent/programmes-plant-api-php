@@ -1,6 +1,9 @@
 {
     "name": "unikent/programmes-plant-api-php",
+    "version": "0.1",
+    "type": "library",
     "description": "A library for interacting with the Programmes Plant REST API.",
+    "homepage": "http://github.com/unikent/programmes-plant-api-php",
     "require": {
         "laravel/curl": "dev-master"
        
@@ -17,5 +20,8 @@
     ],
     "config": {
         "bin-dir": "bin/"
+    },
+    "autoload": {
+        "psr-0": { "ProgrammesPlant\\ProgrammesPlant\\": "src/" }
     }
 }
