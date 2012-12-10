@@ -99,7 +99,7 @@ class ProgrammesPlant
 
 		if (! $curl_response)
 		{
-			throw new ProgrammesPlantException("Could not cURL $url, $this->curl->error_code, $this->curl->error_string");
+			throw new ProgrammesPlantException("Could not cURL $url, " . $this->curl->error_string);
 		}
 
 		$response = json_decode($curl_response);
