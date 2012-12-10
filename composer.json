@@ -1,10 +1,20 @@
 {
+    "name": "unikent/programmes-plant-api-php",
+    "description": "A library for interacting with the Programmes Plant REST API.",
     "require": {
-    	"phpunit/phpunit": "*",
-        "mockery/mockery": ">=0.7.2",
-        "laravel/curl": "dev-master"
+        "laravel/curl": "dev-master",
+       
     },
-    
+    "require-dev": {
+        "mockery/mockery": ">=0.7.2",
+        "phpunit/phpunit": "*"
+    },
+    "authors": [
+        {
+            "name": "Alex Andrews",
+            "email": "a.andrews@kent.ac.uk"
+        }
+    ],
     "config": {
         "bin-dir": "bin/"
     }
