@@ -141,26 +141,26 @@ class ProgrammesPlant
 	 /**
 	  * Get a programme by ID from the API.
 	  * 
-	  * @param int $id The ID of the programme to get.
-	  * @param string $level Either undergraduate or post-graduate.
 	  * @param int $year The year of the programme to get.
+	  * @param string $level Either undergraduate or post-graduate.
+	  * @param int $id The ID of the programme to get.
 	  * @return object $response The programme as an object.
 	  */ 
-	 public function get_programme($id, $level, $year)
+	 public function get_programme($year, $level, $id)
 	 {
-	 	return $this->make_request("$level/$year/$id");
+	 	return $this->make_request("$year/$level/programme/$id");
 	 }
 
 	 /**
 	  * Get the complete index of programmes from the API.
 	  * 
-	  * @param string $level Either undergraduate for post-graduate.
 	  * @param int $year The year of the programme index to get.
+	  * @param string $level Either undergraduate for post-graduate.
 	  * @return object $response The programmes index as an object.
 	  */
-	 public function get_programmes_index($level, $year)
+	 public function get_programmes_index($year, $level)
 	 {
-	 	return $this->make_request("$level/$year");
+	 	return $this->make_request("$year/$level");
 	 }
 }
 
