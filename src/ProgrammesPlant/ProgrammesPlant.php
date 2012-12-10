@@ -131,7 +131,7 @@ class ProgrammesPlant
 	  * @param int $year The year of the programme index to get.
 	  * @return object $response The programmes index as an object.
 	  */
-	 public function get_index($level, $year)
+	 public function get_programmes_index($level, $year)
 	 {
 	 	return $this->make_request("$level/$year");
 	 }
