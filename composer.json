@@ -7,7 +7,6 @@
     "license": "GPL-3.0+",
     "require": {
         "laravel/curl": "dev-master"
-       
     },
     "require-dev": {
         "mockery/mockery": ">=0.7.2",
