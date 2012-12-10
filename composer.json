@@ -2,7 +2,7 @@
     "name": "unikent/programmes-plant-api-php",
     "description": "A library for interacting with the Programmes Plant REST API.",
     "require": {
-        "laravel/curl": "dev-master",
+        "laravel/curl": "dev-master"
        
     },
     "require-dev": {
