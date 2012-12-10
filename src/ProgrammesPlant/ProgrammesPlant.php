@@ -1,6 +1,7 @@
 <?php 
-
 namespace ProgrammesPlant;
+
+require_once dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php';
 
 /**
  * ProgrammesPlant
@@ -74,7 +75,7 @@ class ProgrammesPlant
 	*/
 	public function curl_request($url)
 	{
-		$this->curl = new Curl($url);
+		$this->curl = new \Curl($url);
 		$this->curl->http_method = 'get';
 
 		if ($this->proxy)
@@ -82,7 +83,7 @@ class ProgrammesPlant
 			$this->curl->proxy($this->proxy_server, $this->proxy_port);
 		}
 		
-		return $this->curl->execute;
+		return $this->curl->execute();
 	}
 
 	/**
