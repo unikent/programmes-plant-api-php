@@ -2,10 +2,8 @@
     "require": {
     	"phpunit/phpunit": "*",
         "mockery/mockery": ">=0.7.2",
-        "laravel/curl": "*"
+        "laravel/curl": "dev-master"
     },
-
-    "minimum-stability": "dev",
     
     "config": {
         "bin-dir": "bin/"
