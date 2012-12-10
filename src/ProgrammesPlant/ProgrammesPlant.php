@@ -36,6 +36,16 @@ class ProgrammesPlant
 	public $proxy_port = '';
 
 	/**
+	 * Holds the success of the last response.
+	 */
+	public $last_response = false;
+
+	/**
+	 * Stores errors.
+	 */
+	public $errors = array();
+
+	/**
 	 * Construct The Class.
 	 * 
 	 * Adding in the API target for the programmes plant, a URL.
@@ -96,20 +106,36 @@ class ProgrammesPlant
 	public function make_request($api_method)
 	{
 		$url = "$this->api_target/$api_method";
-		$curl_response = $this->curl_request($url);
+		$this->last_response = $this->curl_request($url);
 
-		if (! $curl_response)
+		if (! $this->last_response)
 		{
-			throw new ProgrammesPlantException("Could not cURL $url, " . $this->curl->error_string);
+			$this->errors[] = "Could not get $url, error was " . $this->curl->error_code . ' with ' . $this->curl->error_string;
+			return false;
 		}
 
-		$response = json_decode($curl_response);
+		$response = json_decode($this->last_response);
 		if (! $response)
 		{
 			throw new ProgrammesPlantException("Response from $url was not valid JSON");
 		}
 
 	 	return $response;
+	 }
+
+	 /**
+	  * Print errors to screen.
+	  * 
+	  * @return void
+	  */
+	 public function print_errors()
+	 {
+	 	echo "\n";
+	 	
+	 	foreach($this->errors as $error)
+	 	{
+	 		echo $error . "\n";
+	 	}
 	 }
 
 	 /**
