@@ -4,6 +4,7 @@
     "type": "library",
     "description": "A library for interacting with the Programmes Plant REST API.",
     "homepage": "http://github.com/unikent/programmes-plant-api-php",
+    "license": "GPL-3.0+",
     "require": {
         "laravel/curl": "dev-master"
        
