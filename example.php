@@ -1,5 +1,5 @@
 <?php
-require_once 'src/ProgrammesPlant/ProgrammesPlant.php';
+require_once dirname(__FILE__) . '/vendor/autoload.php';
 
 $api_url = 'http://xcri.dev/ws/';
 

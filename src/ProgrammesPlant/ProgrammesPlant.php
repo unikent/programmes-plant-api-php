@@ -1,8 +1,6 @@
 <?php 
 namespace ProgrammesPlant;
 
-require_once dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php';
-
 /**
  * ProgrammesPlant
  * 
