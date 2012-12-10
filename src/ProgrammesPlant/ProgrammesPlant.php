@@ -49,7 +49,8 @@ class ProgrammesPlant
 		throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified");
 		}
 
-		$this->api_target = $api_target;
+		// Remove trailing slash as this sometimes causes a 404 with cURL
+		$this->api_target = rtrim($api_target, '/');
 	}
 
 	/**

@@ -17,6 +17,15 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('http://example.com/api', $pp->api_target);
 	}
 
+	public function test__constructTrimsTrailingSlashesOffTheURL()
+	{
+		$pp = new PP("http://example.com/api/");
+		$this->assertEquals('http://example.com/api', $pp->api_target, 'Constructor did not strip trailing slash.');
+
+		$pp = new PP("http://example.com/api/2");
+		$this->assertEquals('http://example.com/api/2', $pp->api_target, 'Constructor stripped something more than trailing slash.');
+	}
+
 	/**
      * @expectedException ProgrammesPlant\ProgrammesPlantException
      */
