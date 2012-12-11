@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace ProgrammesPlant;
 
 /**
@@ -6,7 +7,7 @@ namespace ProgrammesPlant;
  * 
  * Provides a simple API for the Programmes Plant REST API.
  */
-class ProgrammesPlant 
+class API
 {
 	/**
 	 * Persists the cURL object.
