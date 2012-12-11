@@ -22,7 +22,7 @@
         "bin-dir": "bin/"
     },
     "autoload": {
-        "psr-0": { "ProgrammesPlant": "src/" }
+        "psr-0": { "ProgrammesPlant\\": "lib/" }
     },
     "minimum-stability": "dev"
 }

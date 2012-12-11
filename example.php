@@ -3,7 +3,7 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 
 $api_url = 'http://xcri.dev/ws/';
 
-$pp = new \ProgrammesPlant\ProgrammesPlant($api_url);
+$pp = new ProgrammesPlant\API($api_url);
 
 // Get the index of programmes
 $programmes = $pp->get_programmes_index('2014', 'ug');
