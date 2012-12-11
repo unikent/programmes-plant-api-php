@@ -1,8 +1,7 @@
 <?php
-require_once dirname(dirname(__FILE__)) . '/src/ProgrammesPlant/ProgrammesPlant.php';
 
 use \Mockery as m;
-use \ProgrammesPlant\ProgrammesPlant as PP;
+use \ProgrammesPlant\API as PP;
 
 class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 {
