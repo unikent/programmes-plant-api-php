@@ -8,12 +8,12 @@ A PHP library for interacting with the [Programmes Plant](http://github.com/unik
 
 ## Installing For Development
 
-Dependencies are installed using [Composer](http://getcomposer.org/). Once installed run `composer.phar install` (or `composer` dependending on where Composer is installed).
+Dependencies are installed using [Composer](http://getcomposer.org/). Once installed run `composer.phar install --dev` (or `composer` dependending on where Composer is installed).
 
 
 ## Installing For Production
 
-Also run `composer install` before usage. It requires some simple dependencies.
+Run `composer install` before usage.
 
 ## Tests
 
