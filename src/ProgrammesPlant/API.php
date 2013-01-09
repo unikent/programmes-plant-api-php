@@ -147,7 +147,7 @@ class API
 	  */ 
 	 public function get_programme($year, $level, $id)
 	 {
-	 	return $this->make_request("$year/$level/programme/$id");
+	 	return $this->make_request("$year/$level/programmes/$id");
 	 }
 
 	 /**
@@ -159,7 +159,7 @@ class API
 	  */
 	 public function get_programmes_index($year, $level)
 	 {
-	 	return $this->make_request("$year/$level");
+	 	return $this->make_request("$year/$level/programmes");
 	 }
 }
 
