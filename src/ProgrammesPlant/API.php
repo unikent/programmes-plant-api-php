@@ -86,6 +86,9 @@ class API
 	public function curl_request($url)
 	{
 		$this->curl = new \Curl($url);
+		
+		$this->curl->option(CURLOPT_SSL_VERIFYPEER, false);
+		
 		$this->curl->http_method = 'get';
 
 		if ($this->proxy)
