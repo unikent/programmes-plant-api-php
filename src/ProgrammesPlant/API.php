@@ -164,6 +164,18 @@ class API
 	 {
 	 	return $this->make_request("$year/$level/programmes");
 	 }
+	 
+	 /**
+	  * Get an index of subjects from the programmes plant API
+	  * 
+	  * @param int $year The year of programmes to get.
+	  * @param string $level Either undergraduate or post-graduate.
+	  * @return array $response The subject index as an array.
+	  */ 
+	 public function get_subject_index($year, $level)
+	 {
+	 	return $this->make_request("$year/$level/subjects");
+	 }
 }
 
 class ProgrammesPlantException extends \Exception {}
