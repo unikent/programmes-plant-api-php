@@ -61,5 +61,14 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 		$this->assertFalse($pp->guzzle_options['ssl.certificate_authority']);
 	}
 
+	public function testGuzzleClientSetsUpProxy()
+	{
+		$pp = new PP('http://example.com');
+		$pp->set_proxy('http://proxyserver.com', 3128);
+
+		$this->assertTrue($pp->guzzle_options['curl.options']['CURLOPT_HTTPPROXYTUNNEL']);
+		$this->assertEquals('http://proxyserver.com:3128', $pp->guzzle_options['curl.options']['CURLOPT_PROXY']);
+	}
+
 }
 

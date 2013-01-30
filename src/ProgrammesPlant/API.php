@@ -35,12 +35,7 @@ class API
 	 * The port of a HTTP proxy if required.
 	 */
 	public $proxy_port = '';
-
-	/**
-	 * Holds the success of the last response.
-	 */
-	public $last_response = false;
-
+	
 	/**
 	 * Stores errors.
 	 */
@@ -80,6 +75,9 @@ class API
 		$this->proxy = true;
 		$this->proxy_server = $proxy_server;
 		$this->proxy_port = $proxy_port;
+
+		$this->guzzle_options['curl.options']['CURLOPT_HTTPPROXYTUNNEL'] = true;
+		$this->guzzle_options['curl.options']['CURLOPT_PROXY'] = $this->proxy_server . ':' . $this->proxy_port;
 	}
 
 	/**
@@ -191,7 +189,7 @@ class API
 	 }
 	 
 	 /**
-	  * Get an "unpublished" preiview programme from the Programmes Plant API
+	  * Get an "unpublished" preview programme from the Programmes Plant API
 	  * 
 	  * @param string $hash Unique identifier for preview snapshot.
 	  * @return object $response The programme as an object.
