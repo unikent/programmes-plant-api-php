@@ -53,5 +53,13 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue($pp->proxy);
 	}
 
+	public function testSetSSLToNotVerify()
+	{
+		$pp = new PP('http://example.com');
+		$pp->no_ssl_verification();
+
+		$this->assertFalse($pp->guzzle_options['ssl.certificate_authority']);
+	}
+
 }
 

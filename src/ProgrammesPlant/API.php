@@ -2,6 +2,8 @@
 
 namespace ProgrammesPlant;
 
+use Guzzle\Http\Client;
+
 /**
  * ProgrammesPlant
  * 
@@ -12,7 +14,7 @@ class API
 	/**
 	 * Persists the cURL object.
 	 */
-	public $curl = false;
+	public $guzzle_client = false;
 
 	/**
 	 * The location the API is at.
@@ -43,6 +45,11 @@ class API
 	 * Stores errors.
 	 */
 	public $errors = array();
+
+	/**
+	 * Client options used by Guzzle.
+	 */
+	public $guzzle_options = array();
 
 	/**
 	 * Construct The Class.
@@ -76,27 +83,38 @@ class API
 	}
 
 	/**
-	* Runs a cURL request.
-	* 
-	* The library here automatically sets CURLOPT_RETURNTRANSFER and CURLOPT_FOLLOWLOCATION.
+	 * Turn SSL verification for our API request off.
+	 * 
+	 * @return void
+	 */
+	public function no_ssl_verification()
+	{
+		$this->guzzle_options['ssl.certificate_authority'] = false;
+	}
+
+	/**
+	* Runs the request against the API.
 	*
-	* @param string $url The URL to make the request to.
+	* @param string $url The API endpoint to send a request to.
 	* @return string $response The response object.
 	*/
-	public function curl_request($url)
+	public function guzzle_request($url)
 	{
-		$this->curl = new \Curl($url);
-		
-		$this->curl->option(CURLOPT_SSL_VERIFYPEER, false);
-		
-		$this->curl->http_method = 'get';
-
-		if ($this->proxy)
+		if (! $this->guzzle_client)
 		{
-			$this->curl->proxy($this->proxy_server, $this->proxy_port);
+			$this->guzzle_client = new Client($this->api_target, $this->guzzle_options);
 		}
-		
-		return $this->curl->execute();
+
+		try 
+		{
+			$response = $this->guzzle_client->get($url)->send();
+		}
+		catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
+		{
+			echo 'Bad response from Guzzle' . $e->getMessage();
+		}
+
+		return $response;	
 	}
 
 	/**
@@ -107,22 +125,17 @@ class API
 	*/
 	public function make_request($api_method)
 	{
-		$url = "$this->api_target/$api_method";
-		$this->last_response = $this->curl_request($url);
+		$url = $api_method;
+		$response = $this->guzzle_request($url);
 
-		if (! $this->last_response)
-		{
-			$this->errors[] = "Could not get $url, error was " . $this->curl->error_code . ' with ' . $this->curl->error_string;
-			return false;
-		}
+		$payload = json_decode($response->getBody());
 
-		$response = json_decode($this->last_response);
 		if (! $response)
 		{
 			throw new ProgrammesPlantException("Response from $url was not valid JSON");
 		}
 
-	 	return $response;
+	 	return $payload;
 	 }
 
 	 /**
