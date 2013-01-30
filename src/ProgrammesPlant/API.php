@@ -176,6 +176,17 @@ class API
 	 {
 	 	return $this->make_request("$year/$level/subjects");
 	 }
+	 
+	 /**
+	  * Get an "unpublished" preiview programme from the Programmes Plant API
+	  * 
+	  * @param string $hash Unique identifier for preview snapshot.
+	  * @return object $response The programme as an object.
+	  */ 
+	 public function get_preview_programme($hash)
+	 {
+	 	return $this->make_request("preview/$hash");
+	 }
 }
 
 class ProgrammesPlantException extends \Exception {}
