@@ -6,7 +6,8 @@
     "homepage": "http://github.com/unikent/programmes-plant-api-php",
     "license": "GPL-3.0+",
     "require": {
-        "laravel/curl": "dev-master"
+        "laravel/curl": "dev-master",
+        "guzzle/guzzle": "3.1.2"
     },
     "require-dev": {
         "mockery/mockery": ">=0.7.2",
