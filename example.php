@@ -24,11 +24,4 @@ foreach ($programmes as $programme)
 // Get a single programme
 $programme = $pp->get_programme('2014', 'ug', $id);
 
-if (! $pp->last_response)
-{
-	echo "Could not get programme with ID of $id, error was:";
-	$pp->print_errors();
-	exit(1);
-}
-
-echo "Got $id - its called $programme->name";
+var_dump($programme);
