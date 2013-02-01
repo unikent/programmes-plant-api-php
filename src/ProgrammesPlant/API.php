@@ -3,6 +3,7 @@
 namespace ProgrammesPlant;
 
 use Guzzle\Http\Client;
+use Guzzle\Http\Message\Response;
 use Guzzle\Cache\DoctrineCacheAdapter;
 use Guzzle\Plugin\Cache\CachePlugin;
 
@@ -175,6 +176,23 @@ class API
 	}
 
 	/**
+	 * Serve the response from cache.
+	 * 
+	 * @return bool|array  False if we haven't got this in the cache, the cache array if not.
+	 */
+	public function serve_from_cache()
+	{
+		// Work out how this would be cached.
+		$key_provider = new \Guzzle\Plugin\Cache\DefaultCacheKeyProvider();
+		$cache_key = $key_provider->getCacheKey($this->request);
+
+		// Attempt to get cache object.
+		$cached = $this->cache_object->fetch($cache_key);
+
+		return $cached;
+	}
+
+	/**
 	* Runs the request against the API.
 	*
 	* @param string $url The API endpoint to send a request to.
@@ -214,9 +232,10 @@ class API
 			}			
 		}
 
+		$this->request = $this->guzzle_client->get($url);
+
 		try 
 		{
-			$this->request = $this->guzzle_client->get($url);
 			$this->last_response = $this->request->send();
 		}
 
@@ -232,6 +251,8 @@ class API
 			{
 				case 404:
 					throw new ProgrammesPlantNotFoundException("$url not found, attempting to get " . $this->api_target . '/' . $url);
+				break;
+
 				default:
 					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', error code ' . $e->getResponse()->getStatusCode());
 				break;
@@ -243,18 +264,25 @@ class API
 		// Attempt to respond with cache or throw an error.
 		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
 		{
-			throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', Guzzle reports ' . $e->getMessage());
+			$cached = $this->serve_from_cache();
+
+			if (! $cached)
+			{
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', Guzzle reports ' . $e->getMessage());
+			}
+
+			return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
 		}
 
 		// cURL Related Exception
-		// Attempt a cache load or throw an error.
 		catch (\Guzzle\Http\Exception\CurlException $e)
 		{
 			// Server Not Found
-			// Likely the API is down.
+			// Likely the API is down due to some misconfiguration.
+			// Attempt to get from cache or throw an exception.
 			if ($e->getErrorNo() == 6)
 			{
-				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down?');
+				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down? - no cache.');
 			}
 			else
 			{
