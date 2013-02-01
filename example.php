@@ -12,16 +12,29 @@ $id = false;
 
 foreach ($programmes as $programme)
 {
-	echo "$programme->name - https://xcri.dev/ug/programmes/edit/$programme->id\n";
-
-	// Save an ID to use in a moment.
-	if (! $id) 
-	{
-		$id = $programme->id;
-	}
+	echo "$programme->name\n";
 }
 
 // Get a single programme
-$programme = $pp->get_programme('2014', 'ug', $id);
+$programme = $pp->get_programme('2014', 'ug', 1);
 
 var_dump($programme);
+
+/**
+ * Caching functionality.
+ */
+
+// Disk cache
+$pp = new ProgrammesPlant\API($api_url);
+$pp->with_cache('file')->directory('/tmp/cache');
+
+// Get a single programme.
+$programme = $pp->get_programme('2014', 'ug', 1);
+
+var_dump($programme);
+
+// This next time it should come from the cache.
+$programme = $pp->get_programme('2014', 'ug', 1);
+
+
+
