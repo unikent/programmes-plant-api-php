@@ -274,18 +274,6 @@ class API
 	public function make_request($api_method)
 	{
 		$response = $this->guzzle_request($api_method);
-
-		if ($this->errors)
-		{
-			if ($errors[0] == 404)
-			{
-
-			}
-			else
-			{
-				throw new ProgrammesPlantRequestException("Error occurred: " . $this->errors[0]);
-			}
-		}
 		
 		$payload = json_decode($response->getBody());
 
@@ -295,21 +283,6 @@ class API
 		}
 
 	 	return $payload;
-	 }
-
-	 /**
-	  * Print errors to screen.
-	  * 
-	  * @return void
-	  */
-	 public function print_errors()
-	 {
-	 	echo "\n";
-	 	
-	 	foreach($this->errors as $error)
-	 	{
-	 		echo $error . "\n";
-	 	}
 	 }
 
 	 /**
