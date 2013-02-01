@@ -70,5 +70,45 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('http://proxyserver.com:3128', $pp->guzzle_options['curl.options']['CURLOPT_PROXY']);
 	}
 
+	public function testcacheTurnsCacheOn()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+		$pp->directory('/tmp');
+
+		$this->assertEquals('file', $pp->cache);
+		$this->assertEquals('/tmp', $pp->cache_directory);
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheDirectoryDoesNotExist()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+		$pp->directory('/star/wars');
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheIsOfAnUnknownType()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('hghjghghgh');
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheDirectoryIsNotSetButWeHaveSetTypeToFile()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+
+		$pp->guzzle_request('/users/');
+	}
+
 }
 
