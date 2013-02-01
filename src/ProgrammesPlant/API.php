@@ -221,7 +221,7 @@ class API
 		}
 
 		/**
-		 * Handle each of the possible exception states seperately.
+		 * Handle each of the possible exception states separately.
 		 */
 
 		// 4xx Codes
