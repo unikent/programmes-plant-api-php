@@ -257,6 +257,7 @@ class API
 					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', error code ' . $e->getResponse()->getStatusCode());
 				break;
 			}
+
 			return;
 		}
 
@@ -268,7 +269,7 @@ class API
 
 			if (! $cached)
 			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', Guzzle reports ' . $e->getMessage());
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache. Guzzle reports ' . $e->getMessage());
 			}
 
 			return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
@@ -282,7 +283,7 @@ class API
 			// Attempt to get from cache or throw an exception.
 			if ($e->getErrorNo() == 6)
 			{
-				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down? - no cache.');
+				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down?');
 			}
 			else
 			{
