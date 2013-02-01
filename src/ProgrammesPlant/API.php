@@ -233,7 +233,7 @@ class API
 				case 404:
 					throw new ProgrammesPlantNotFoundException("$url not found, attempting to get " . $this->api_target . '/' . $url);
 				default:
-					throw new ProgrammesPlantRequestException("Request failed for ' . $this->api_target . '/' . $url ', error code " . $e->getResponse()->getStatusCode());
+					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', error code ' . $e->getResponse()->getStatusCode());
 				break;
 			}
 			return;
@@ -243,7 +243,7 @@ class API
 		// Attempt to respond with cache or throw an error.
 		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
 		{
-			throw new ProgrammesPlantRequestException("Request failed for ' . $this->api_target . '/' . $url ', Guzzle reports " . $e->getMessage());
+			throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', Guzzle reports ' . $e->getMessage());
 		}
 
 		// cURL Related Exception
