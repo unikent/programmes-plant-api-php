@@ -29,11 +29,6 @@ class API
 	public $api_target = '';
 
 	/**
-	 * Boolean that sets if we want to use a proxy in CURL
-	 */
-	public $proxy = false;
-
-	/**
 	 * The location of a HTTP proxy if required.
 	 */
 	public $proxy_server = '';
@@ -42,11 +37,6 @@ class API
 	 * The port of a HTTP proxy if required.
 	 */
 	public $proxy_port = '';
-	
-	/**
-	 * Stores errors.
-	 */
-	public $errors = array();
 
 	/**
 	 * Client options used by Guzzle.
@@ -66,11 +56,6 @@ class API
 	public $cache_object = false;
 
 	/**
-	 * The Guzzle cache plugin.
-	 */
-	public $cache_plugin = false;
-
-	/**
 	 * The current request object for Guzzle.
 	 */
 	public $request = false;
@@ -79,11 +64,6 @@ class API
 	 * The last response.
 	 */
 	public $last_response = false;
-
-	/**
-	 * The cache adapter object.
-	 */
-	public $adapter = false;
 
 	/**
 	 * Directory of the cache.
@@ -220,15 +200,15 @@ class API
 					$this->cache_object = new ArrayCache();
 				}
 
-				$this->adapter = new DoctrineCacheAdapter($this->cache_object);
+				$adapter = new DoctrineCacheAdapter($this->cache_object);
 
-				$this->cache_plugin = new CachePlugin(
+				$cache_plugin = new CachePlugin(
 					array(
-	    				'adapter' => $this->adapter
+	    				'adapter' => $adapter
 					)
 				);
 
-				$this->guzzle_client->addSubscriber($this->cache_plugin);
+				$this->guzzle_client->addSubscriber($cache_plugin);
 			}			
 		}
 
