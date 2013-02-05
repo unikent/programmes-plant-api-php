@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 
-$api_url = 'http://xcri.dev/ws/';
+$api_url = 'http://xcri.dev/api/';
 
 $pp = new ProgrammesPlant\API($api_url);
 
@@ -12,23 +12,29 @@ $id = false;
 
 foreach ($programmes as $programme)
 {
-	echo "$programme->name - https://xcri.dev/ug/programmes/edit/$programme->id\n";
-
-	// Save an ID to use in a moment.
-	if (! $id) 
-	{
-		$id = $programme->id;
-	}
+	echo "$programme->name\n";
 }
 
 // Get a single programme
-$programme = $pp->get_programme('2014', 'ug', $id);
+$programme = $pp->get_programme('2014', 'ug', 1);
 
-if (! $pp->last_response)
-{
-	echo "Could not get programme with ID of $id, error was:";
-	$pp->print_errors();
-	exit(1);
-}
+var_dump($programme);
 
-echo "Got $id - its called $programme->name";
+/**
+ * Caching functionality.
+ */
+
+// Disk cache
+$pp = new ProgrammesPlant\API($api_url);
+$pp->with_cache('file')->directory('/tmp/cache');
+
+// Get a single programme.
+$programme = $pp->get_programme('2014', 'ug', 1);
+
+var_dump($programme);
+
+// This next time it should come from the cache.
+$programme = $pp->get_programme('2014', 'ug', 1);
+
+
+

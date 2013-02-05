@@ -2,6 +2,15 @@
 
 namespace ProgrammesPlant;
 
+use Guzzle\Http\Client;
+use Guzzle\Http\Message\Response;
+use Guzzle\Cache\DoctrineCacheAdapter;
+use Guzzle\Plugin\Cache\CachePlugin;
+
+use Doctrine\Common\Cache\FileCache;
+use Doctrine\Common\Cache\FilesystemCache;
+use Doctrine\Common\Cache\ArrayCache;
+
 /**
  * ProgrammesPlant
  * 
@@ -12,17 +21,12 @@ class API
 	/**
 	 * Persists the cURL object.
 	 */
-	public $curl = false;
+	public $guzzle_client = false;
 
 	/**
 	 * The location the API is at.
 	 */
 	public $api_target = '';
-
-	/**
-	 * Boolean that sets if we want to use a proxy in CURL
-	 */
-	public $proxy = false;
 
 	/**
 	 * The location of a HTTP proxy if required.
@@ -35,14 +39,36 @@ class API
 	public $proxy_port = '';
 
 	/**
-	 * Holds the success of the last response.
+	 * Client options used by Guzzle.
+	 */
+	public $guzzle_options = array();
+
+	/**
+	 * Use a cache or not.
+	 * 
+	 * False or set to a type of cache to use.
+	 */
+	public $cache = false;
+
+	/**
+	 * The cache object itself.
+	 */
+	public $cache_object = false;
+
+	/**
+	 * The current request object for Guzzle.
+	 */
+	public $request = false;
+
+	/**
+	 * The last response.
 	 */
 	public $last_response = false;
 
 	/**
-	 * Stores errors.
+	 * Directory of the cache.
 	 */
-	public $errors = array();
+	public $cache_directory;
 
 	/**
 	 * Construct The Class.
@@ -55,11 +81,52 @@ class API
 	{
 		if (! $api_target)
 		{
-		throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified");
+			throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified");
 		}
 
 		// Remove trailing slash as this sometimes causes a 404 with cURL
 		$this->api_target = rtrim($api_target, '/');
+	}
+
+	/**
+	 * Turn the cache on with a particular type.
+	 * 
+	 * Defaults to memory without first argument.
+	 * 
+	 * @param string The type of cache - currently support are array and file.
+	 */
+	public function with_cache($type = 'memory')
+	{
+		if (strpos($type, 'memory') === false && strpos($type, 'file') === false)
+		{
+			throw new ProgrammesPlantException("$this->cache is not a supported cache type");
+		}
+
+		$this->cache = $type;
+
+		return $this;
+	}
+
+	/**
+	 * Set the directory for the file cache.
+	 *
+	 * @param $dir The directory for the cache.
+	 */
+	public function directory($directory)
+	{
+		if ($this->cache != 'file')
+		{
+			throw new ProgrammesPlantException("Cannot set directory, not using file cache.");
+		}
+
+		if (! is_dir($directory))
+		{
+			throw new ProgrammesPlantException("Directory does not exist");
+		}
+
+		$this->cache_directory = $directory;
+
+		return $this;
 	}
 
 	/**
@@ -73,71 +140,158 @@ class API
 		$this->proxy = true;
 		$this->proxy_server = $proxy_server;
 		$this->proxy_port = $proxy_port;
+
+		$this->guzzle_options['curl.options']['CURLOPT_HTTPPROXYTUNNEL'] = true;
+		$this->guzzle_options['curl.options']['CURLOPT_PROXY'] = $this->proxy_server . ':' . $this->proxy_port;
 	}
 
 	/**
-	* Runs a cURL request.
-	* 
-	* The library here automatically sets CURLOPT_RETURNTRANSFER and CURLOPT_FOLLOWLOCATION.
+	 * Turn SSL verification for our API request off.
+	 * 
+	 * @return void
+	 */
+	public function no_ssl_verification()
+	{
+		$this->guzzle_options['ssl.certificate_authority'] = false;
+	}
+
+	/**
+	 * Serve the response from cache.
+	 * 
+	 * @return bool|array  False if we haven't got this in the cache, the cache array if not.
+	 */
+	public function serve_from_cache()
+	{
+		// Work out how this would be cached.
+		$key_provider = new \Guzzle\Plugin\Cache\DefaultCacheKeyProvider();
+		$cache_key = $key_provider->getCacheKey($this->request);
+
+		// Attempt to get cache object.
+		$cached = $this->cache_object->fetch($cache_key);
+
+		return $cached;
+	}
+
+	/**
+	* Runs the request against the API.
 	*
-	* @param string $url The URL to make the request to.
+	* @param string $url The API endpoint to send a request to.
 	* @return string $response The response object.
 	*/
-	public function curl_request($url)
+	public function guzzle_request($url)
 	{
-		$this->curl = new \Curl($url);
-		
-		$this->curl->option(CURLOPT_SSL_VERIFYPEER, false);
-		
-		$this->curl->http_method = 'get';
-
-		if ($this->proxy)
+		if (! $this->guzzle_client)
 		{
-			$this->curl->proxy($this->proxy_server, $this->proxy_port);
+			$this->guzzle_client = new Client($this->api_target, $this->guzzle_options);
+
+			if ($this->cache)
+			{
+				if ($this->cache == 'file')
+				{
+					if (! $this->cache_directory)
+					{
+						throw new ProgrammesPlantException("No cache directory set");
+					}
+
+					$this->cache_object = new FilesystemCache($this->cache_directory);
+				}
+				elseif ($this->cache == 'memory')
+				{
+					$this->cache_object = new ArrayCache();
+				}
+
+				$adapter = new DoctrineCacheAdapter($this->cache_object);
+
+				$cache_plugin = new CachePlugin(
+					array(
+	    				'adapter' => $adapter
+					)
+				);
+
+				$this->guzzle_client->addSubscriber($cache_plugin);
+			}			
 		}
-		
-		return $this->curl->execute();
+
+		$this->request = $this->guzzle_client->get($url);
+
+		try 
+		{
+			$this->last_response = $this->request->send();
+		}
+
+		/**
+		 * Handle each of the possible exception states separately.
+		 */
+
+		// 4xx Codes
+		// Throw exception.
+		catch (\Guzzle\Http\Exception\ClientErrorResponseException $e)
+		{
+			switch ($e->getResponse()->getStatusCode()) 
+			{
+				case 404:
+					throw new ProgrammesPlantNotFoundException("$url not found, attempting to get " . $this->api_target . '/' . $url);
+				break;
+
+				default:
+					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', error code ' . $e->getResponse()->getStatusCode());
+				break;
+			}
+
+			return;
+		}
+
+		// 5xx Codes
+		// Attempt to respond with cache or throw an error.
+		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
+		{
+			$cached = $this->serve_from_cache();
+
+			if (! $cached)
+			{
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache. Guzzle reports ' . $e->getMessage());
+			}
+
+			return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
+		}
+
+		// cURL Related Exception
+		catch (\Guzzle\Http\Exception\CurlException $e)
+		{
+			// Server Not Found
+			// Likely the API is down due to some misconfiguration.
+			// Attempt to get from cache or throw an exception.
+			if ($e->getErrorNo() == 6)
+			{
+				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down?');
+			}
+			else
+			{
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. Guzzle reports ' . $e->getMessage());
+			}
+		}
+
+		return $this->last_response;	
 	}
 
 	/**
 	* Runs a request against the Programmes Plant API.
 	* 
-	* @param $api_method The API method.
-	* @return class $response The de-JSONified response from the API.
+	* @param $url              The API method.
+	* @return class $response  The de-JSONified response from the API.
 	*/
 	public function make_request($api_method)
 	{
-		$url = "$this->api_target/$api_method";
-		$this->last_response = $this->curl_request($url);
+		$response = $this->guzzle_request($api_method);
+		
+		$payload = json_decode($response->getBody());
 
-		if (! $this->last_response)
-		{
-			$this->errors[] = "Could not get $url, error was " . $this->curl->error_code . ' with ' . $this->curl->error_string;
-			return false;
-		}
-
-		$response = json_decode($this->last_response);
 		if (! $response)
 		{
 			throw new ProgrammesPlantException("Response from $url was not valid JSON");
 		}
 
-	 	return $response;
-	 }
-
-	 /**
-	  * Print errors to screen.
-	  * 
-	  * @return void
-	  */
-	 public function print_errors()
-	 {
-	 	echo "\n";
-	 	
-	 	foreach($this->errors as $error)
-	 	{
-	 		echo $error . "\n";
-	 	}
+	 	return $payload;
 	 }
 
 	 /**
@@ -178,7 +332,7 @@ class API
 	 }
 	 
 	 /**
-	  * Get an "unpublished" preiview programme from the Programmes Plant API
+	  * Get an "unpublished" preview programme from the Programmes Plant API
 	  * 
 	  * @param string $hash Unique identifier for preview snapshot.
 	  * @return object $response The programme as an object.
@@ -190,3 +344,9 @@ class API
 }
 
 class ProgrammesPlantException extends \Exception {}
+
+class ProgrammesPlantRequestException extends \Exception {}
+
+class ProgrammesPlantServerNotFound extends \Exception {}
+
+class ProgrammesPlantNotFoundException extends \Exception {}

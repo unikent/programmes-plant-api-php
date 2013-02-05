@@ -6,7 +6,8 @@
     "homepage": "http://github.com/unikent/programmes-plant-api-php",
     "license": "GPL-3.0+",
     "require": {
-        "laravel/curl": "dev-master"
+        "guzzle/guzzle": "3.1.2",
+        "doctrine/cache": "dev-master"
     },
     "require-dev": {
         "mockery/mockery": ">=0.7.2",
@@ -16,6 +17,10 @@
         {
             "name": "Alex Andrews",
             "email": "a.andrews@kent.ac.uk"
+        },
+        {
+            "name": "Justice Addison",
+            "email": "j.n.addison@kent.ac.uk"
         }
     ],
     "config": {

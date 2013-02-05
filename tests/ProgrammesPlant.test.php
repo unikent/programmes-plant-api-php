@@ -53,5 +53,62 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue($pp->proxy);
 	}
 
+	public function testSetSSLToNotVerify()
+	{
+		$pp = new PP('http://example.com');
+		$pp->no_ssl_verification();
+
+		$this->assertFalse($pp->guzzle_options['ssl.certificate_authority']);
+	}
+
+	public function testGuzzleClientSetsUpProxy()
+	{
+		$pp = new PP('http://example.com');
+		$pp->set_proxy('http://proxyserver.com', 3128);
+
+		$this->assertTrue($pp->guzzle_options['curl.options']['CURLOPT_HTTPPROXYTUNNEL']);
+		$this->assertEquals('http://proxyserver.com:3128', $pp->guzzle_options['curl.options']['CURLOPT_PROXY']);
+	}
+
+	public function testcacheTurnsCacheOn()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+		$pp->directory('/tmp');
+
+		$this->assertEquals('file', $pp->cache);
+		$this->assertEquals('/tmp', $pp->cache_directory);
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheDirectoryDoesNotExist()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+		$pp->directory('/star/wars');
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheIsOfAnUnknownType()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('hghjghghgh');
+	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 */
+	public function testExceptionThrownWhenCacheDirectoryIsNotSetButWeHaveSetTypeToFile()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file');
+
+		$pp->guzzle_request('/users/');
+	}
+
 }
 
