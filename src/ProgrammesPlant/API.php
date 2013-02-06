@@ -341,6 +341,46 @@ class API
 	 {
 	 	return $this->make_request("preview/$hash");
 	 }
+	 
+	 /**
+	  * Get subject categories list from the API.
+	  * 
+	  * @return object $response
+	  */ 
+	 public function get_subjectcategories()
+	 {
+	 	return $this->make_request("subjectcategories");
+	 }
+	 
+	 /**
+	  * Get schools list from the API.
+	  * 
+	  * @return object $response
+	  */ 
+	 public function get_schools()
+	 {
+	 	return $this->make_request("schools");
+	 }
+	 
+	 /**
+	  * Get faculties list from the API.
+	  * 
+	  * @return object $response
+	  */ 
+	 public function get_faculties()
+	 {
+	 	return $this->make_request("faculties");
+	 }
+	 
+	 /**
+	  * Get campuses list from the API.
+	  * 
+	  * @return object $response
+	  */ 
+	 public function get_campuses()
+	 {
+	 	return $this->make_request("campuses");
+	 }
 }
 
 class ProgrammesPlantException extends \Exception {}
