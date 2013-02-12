@@ -1,6 +1,5 @@
 <?php
 
-use \Mockery as m;
 use \ProgrammesPlant\API as PP;
 
 class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
@@ -87,8 +86,6 @@ class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 
 	public function tearDown()
 	{
-		m::close();
-
 		$this->wipe_directory(static::$cache_directory);
 	}
 
