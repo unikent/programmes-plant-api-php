@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 
-$api_url = 'http://xcri.dev/api/';
+$api_url = 'http://programmes-plant.dev/api/';
 
 $pp = new ProgrammesPlant\API($api_url);
 
