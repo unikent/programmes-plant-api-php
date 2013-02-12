@@ -2,7 +2,7 @@
 
 use \ProgrammesPlant\API as PP;
 
-class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
+class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 {
 	public static $cache_directory = '';
 
