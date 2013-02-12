@@ -5,6 +5,7 @@ use \ProgrammesPlant\API as PP;
 use Guzzle\Common\Event;
 use Guzzle\Http\Message\Request;
 use Guzzle\Http\Message\Response;
+use Guzzle\Http\Utils;
 
 class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 {
@@ -275,6 +276,31 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
         $this->assertEquals(200, $data[0]);
         $this->assertInternalType('array', $data[1]);
         $this->assertEquals('Foo', $data[2]);
+	}
+
+	/**
+	 * This uses our Node.js server to run actual tests against.
+	 */
+
+	public function testget_subjectMakesAHTTPRequest()
+	{
+		$server = $this->getServer();
+        $server->flush();
+
+        $pp = new PP($this->getServer()->getUrl());
+ 		
+ 		$payload = json_encode(array('test' => 'test'));
+ 		$size = strlen($payload);
+
+ 		// Enqueue the HTTP session.
+ 		$this->getServer()->enqueue(array(
+            "HTTP/1.1 200 OK\r\n" .
+            'Date: ' . Utils::getHttpDate('now') . "\r\n" .
+            "Last-Modified: Mon, 12 Nov 2012 02:53:38 GMT\r\n" .
+            "Content-Length: $size\r\n\r\n$payload"
+        ));
+
+ 		$this->assertNotEmpty($pp->get_subject_index(2014, 'ug'));
 	}
 
 }
