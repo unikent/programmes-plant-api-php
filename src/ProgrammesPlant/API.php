@@ -381,6 +381,16 @@ class API
 	 {
 	 	return $this->make_request("campuses");
 	 }
+	 
+	 /**
+	  * Get subject leaflets from the API.
+	  * 
+	  * @return object $response
+	  */ 
+	 public function get_subject_leaflets()
+	 {
+	 	return $this->make_request("leaflets");
+	 }
 }
 
 class ProgrammesPlantException extends \Exception {}
