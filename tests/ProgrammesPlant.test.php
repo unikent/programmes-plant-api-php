@@ -5,9 +5,91 @@ use \ProgrammesPlant\API as PP;
 
 class ProgrammesPlantTest extends PHPUnit_Framework_TestCase
 {
+	public static $cache_directory = '';
+
+	/**
+	 * Removes a directory and all its contents.
+	 * 
+	 * @param  string $directory Directory to remove.
+	 * @return bool   True or false on success of the deletion.
+	 */
+	public static function remove_directory($directory)
+	{
+		return static::wipe_directory($directory, false);
+	}
+
+	/**
+	 * Blanks a directory i.e. removes all its contents.
+	 * 
+	 * @param  string $directory Directory to blank.
+	 * @param  bool   $empty     If false then this will remove the directory parameter itself also.
+	 * @return bool   True or false depending on the success.
+	 */
+	public static function wipe_directory($directory, $empty = true)
+	{
+    	if (substr($directory,-1) == '/')
+    	{
+        	$directory = substr($directory,0,-1);
+    	}
+
+    	if (!file_exists($directory) || ! is_dir($directory))
+    	{
+        	return false;
+   		}
+   		elseif (is_readable($directory))
+   		{
+       		$handle = opendir($directory);
+
+       		while (false !== ($item = readdir($handle)))
+	        {
+	        	if($item != '.' && $item != '..')
+	            {
+	                $path = $directory.'/'.$item;
+
+	                if(is_dir($path)) 
+	                {
+	                	static::remove_directory($path);
+	                }
+	                else
+	                {
+	                    unlink($path);
+	            	}
+	            }
+	        }
+        	closedir($handle);
+
+	        if ($empty == false)
+	        {
+	        	if (!rmdir($directory))
+	        	{
+	            	return false;
+	           	}
+	        }
+    	}
+
+    	return true;
+	}
+
+	public static function setUpBeforeClass()
+	{
+		static::$cache_directory = sys_get_temp_dir() . '/guzzle-cache/';
+
+		if (! is_dir(static::$cache_directory))
+		{
+			mkdir(static::$cache_directory);
+		}
+	}
+
+	public static function tearDownAfterClass()
+	{
+		static::remove_directory(static::$cache_directory);
+	}
+
 	public function tearDown()
 	{
 		m::close();
+
+		$this->wipe_directory(static::$cache_directory);
 	}
 
 	public function test__constructSetsUpTarget()
