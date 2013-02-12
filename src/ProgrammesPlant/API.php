@@ -300,12 +300,12 @@ class API
 	public function make_request($api_method)
 	{
 		$response = $this->guzzle_request($api_method);
-		
+
 		$payload = json_decode($response->getBody());
 
-		if (! $response)
+		if (is_null($payload))
 		{
-			throw new ProgrammesPlantException("Response from $url was not valid JSON");
+			throw new ProgrammesPlantException("Response was not valid JSON and could not be decoded.");
 		}
 
 	 	return $payload;

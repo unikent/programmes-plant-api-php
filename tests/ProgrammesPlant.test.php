@@ -307,4 +307,29 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
  		$this->assertNotEmpty($pp->get_subject_index(2014, 'ug'));
 	}
 
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 * @expectedExceptionMessage Response was not valid JSON and could not be decoded.
+	 */
+	public function testmake_requestThrowsExceptionWhenResponseIsNotJSON()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($this->getServer()->getUrl());
+
+		$payload = 'This is not JSON';
+		$size = strlen($payload);
+
+		// Enqueue the HTTP session.
+ 		$this->getServer()->enqueue(array(
+            "HTTP/1.1 200 OK\r\n" .
+            'Date: ' . Utils::getHttpDate('now') . "\r\n" .
+            "Last-Modified: Mon, 12 Nov 2012 02:53:38 GMT\r\n" .
+            "Content-Length: $size\r\n\r\n$payload"
+        ));
+
+        $pp->make_request('here');
+	}
+
 }
