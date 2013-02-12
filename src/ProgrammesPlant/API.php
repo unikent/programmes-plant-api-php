@@ -173,12 +173,11 @@ class API
 	}
 
 	/**
-	* Runs the request against the API.
-	*
-	* @param string $url The API endpoint to send a request to.
-	* @return string $response The response object.
-	*/
-	public function guzzle_request($url)
+	 * Prepare the Guzzle object for a request.
+	 * 
+	 * @return $this Self object for chaining.
+	 */
+	public function prepare()
 	{
 		if (! $this->guzzle_client)
 		{
@@ -211,6 +210,19 @@ class API
 				$this->guzzle_client->addSubscriber($cache_plugin);
 			}			
 		}
+
+		return $this;
+	}
+
+	/**
+	* Runs the request against the API.
+	*
+	* @param string $url The API endpoint to send a request to.
+	* @return string $response The response object.
+	*/
+	public function guzzle_request($url)
+	{
+		$this->prepare();
 
 		$this->request = $this->guzzle_client->get($url);
 
