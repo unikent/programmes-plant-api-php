@@ -51,6 +51,11 @@ class API
 	public $cache = false;
 
 	/**
+	 * The cache plugin object.
+	 */
+	public $cache_plugin = false;
+
+	/**
 	 * The cache object itself.
 	 */
 	public $cache_object = false;
@@ -201,13 +206,13 @@ class API
 
 				$adapter = new DoctrineCacheAdapter($this->cache_object);
 
-				$cache_plugin = new CachePlugin(
+				$this->cache_plugin = new CachePlugin(
 					array(
 	    				'adapter' => $adapter
 					)
 				);
 
-				$this->guzzle_client->addSubscriber($cache_plugin);
+				$this->guzzle_client->addSubscriber($this->cache_plugin);
 			}			
 		}
 
