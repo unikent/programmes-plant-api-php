@@ -2,6 +2,10 @@
 
 use \ProgrammesPlant\API as PP;
 
+use Guzzle\Common\Event;
+use Guzzle\Http\Message\Request;
+use Guzzle\Http\Message\Response;
+
 class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 {
 	public static $cache_directory = '';
@@ -189,5 +193,88 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp->guzzle_request('/users/');
 	}
 
-}
+	/**
+	 * We have two objects exposed publically:
+	 *  - $cache_object - The instance of the cache object itself.
+	 *  - $cache_plugin - The instance of the cache as a plugin for Guzzle.
+	 * 
+	 * We can use the latter to actually access data and ensure it is correctly cached.
+	 */
 
+	public function testRequestIsCachedWhenResponseIsCacheableWithMemoryCache()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('memory');
+		$pp->prepare();
+
+		// Simulate the events for the cache object.
+		$request = new Request('GET', 'http://foo.com');
+		$response = new Response(200, array(), 'Foo');
+
+		// Fake the request.
+		$pp->cache_plugin->onRequestBeforeSend(
+			new Event(array(
+            	'request' => $request
+        	))
+		);
+
+		// Fake the response to that request.
+        $pp->cache_plugin->onRequestSent(
+        	new Event(array(
+        		'request'  => $request,
+            	'response' => $response
+        	))
+        );
+
+        $data = $this->readAttribute($pp->cache_object, 'data');
+
+        $this->assertNotEmpty($data, "Cache did not return any data on a request.");
+
+        // Obtain the last thing put in the cache.
+        $data = end($data);
+
+        // Assert we are caching the response as we put it in.
+        // [0] => HTTP Code, [1] => HTTP Headers, [2] => Body
+        $this->assertEquals(200, $data[0]);
+        $this->assertInternalType('array', $data[1]);
+        $this->assertEquals('Foo', $data[2]);
+	}
+
+	public function testRequestIsCachedWhenResponseIsCacheableWithFileCache()
+	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file')->directory(static::$cache_directory); 
+		$pp->prepare();
+
+		// Simulate the events for the cache object.
+		$request = new Request('GET', 'http://foo.com');
+		$response = new Response(200, array(), 'Foo');
+
+		// Fake the request.
+		$pp->cache_plugin->onRequestBeforeSend(
+			new Event(array(
+            	'request' => $request
+        	))
+		);
+
+		// Fake the response to that request.
+        $pp->cache_plugin->onRequestSent(
+        	new Event(array(
+        		'request'  => $request,
+            	'response' => $response
+        	))
+        );
+
+        $key_provider = new \Guzzle\Plugin\Cache\DefaultCacheKeyProvider();
+		$data = $pp->cache_object->fetch($key_provider->getCacheKey($request));
+
+        $this->assertNotEmpty($data, "Cache did not return any data on a request.");
+
+        // Assert we are caching the response as we put it in.
+        // [0] => HTTP Code, [1] => HTTP Headers, [2] => Body
+        $this->assertEquals(200, $data[0]);
+        $this->assertInternalType('array', $data[1]);
+        $this->assertEquals('Foo', $data[2]);
+	}
+
+}
