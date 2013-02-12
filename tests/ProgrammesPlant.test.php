@@ -111,6 +111,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 	/**
      * @expectedException ProgrammesPlant\ProgrammesPlantException
+     * @expectedExceptionMessage No Endpoint for Programmes Plant API specified.
      */
 	public function test__constructThrowsExpectionWhenTargetIsNotSpecified()
 	{
@@ -166,6 +167,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 	/**
 	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+     * @expectedExceptionMessage Directory does not exist.
 	 */
 	public function testExceptionThrownWhenCacheDirectoryDoesNotExist()
 	{
@@ -176,6 +178,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 	/**
 	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 * @expectedExceptionMessage hghjghghgh is not a supported cache type.
 	 */
 	public function testExceptionThrownWhenCacheIsOfAnUnknownType()
 	{
@@ -185,6 +188,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 	/**
 	 * @expectedException ProgrammesPlant\ProgrammesPlantException
+	 * @expectedExceptionMessage No cache directory set.
 	 */
 	public function testExceptionThrownWhenCacheDirectoryIsNotSetButWeHaveSetTypeToFile()
 	{

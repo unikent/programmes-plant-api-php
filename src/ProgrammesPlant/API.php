@@ -86,7 +86,7 @@ class API
 	{
 		if (! $api_target)
 		{
-			throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified");
+			throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified.");
 		}
 
 		// Remove trailing slash as this sometimes causes a 404 with cURL
@@ -104,7 +104,7 @@ class API
 	{
 		if (strpos($type, 'memory') === false && strpos($type, 'file') === false)
 		{
-			throw new ProgrammesPlantException("$this->cache is not a supported cache type");
+			throw new ProgrammesPlantException("$type is not a supported cache type.");
 		}
 
 		$this->cache = $type;
@@ -126,7 +126,7 @@ class API
 
 		if (! is_dir($directory))
 		{
-			throw new ProgrammesPlantException("Directory does not exist");
+			throw new ProgrammesPlantException("Directory does not exist.");
 		}
 
 		$this->cache_directory = $directory;
@@ -194,7 +194,7 @@ class API
 				{
 					if (! $this->cache_directory)
 					{
-						throw new ProgrammesPlantException("No cache directory set");
+						throw new ProgrammesPlantException("No cache directory set.");
 					}
 
 					$this->cache_object = new FilesystemCache($this->cache_directory);
