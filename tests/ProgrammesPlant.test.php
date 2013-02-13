@@ -402,7 +402,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	{
 		$pp = new PP('http://this.url.does.not.exist/forsure/');
 
-		$pp->guzzle_request('/');
+		$pp->guzzle_request('');
 	}
 
 	/**
@@ -415,7 +415,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	{
 		$pp = new PP('this@not$$$URL');
 
-		$pp->guzzle_request('/');
+		$pp->guzzle_request('');
 	}
 
 	/**
@@ -429,6 +429,6 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp = new PP('http://example.com');
 		$pp->set_proxy('http://this.is.not.a.proxy.server.at.all');
 
-		$pp->guzzle_request('/');
+		$pp->guzzle_request('');
 	}
 }
