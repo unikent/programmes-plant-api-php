@@ -21,7 +21,7 @@ class API
 	/**
 	 * Persists the cURL object.
 	 */
-	public $guzzle_client = false;
+	protected $guzzle_client = false;
 
 	/**
 	 * The location the API is at.
