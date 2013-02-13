@@ -259,17 +259,25 @@ class API
 		}
 
 		// 5xx Codes
-		// Attempt to respond with cache or throw an error.
+		// Attempt to respond with cache or throws an error.
 		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
 		{
-			$cached = $this->serve_from_cache();
-
-			if (! $cached)
+			// Obtain from cache.
+			if ($this->cache)
 			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache. Guzzle reports ' . $e->getMessage());
-			}
+				$cached = $this->serve_from_cache();
 
-			return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
+				if (! $cached)
+				{
+					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - attempted to serve from cache but not found.');
+				}
+
+				return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
+			}
+			else
+			{
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache.');
+			}
 		}
 
 		// cURL Related Exception

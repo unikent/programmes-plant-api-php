@@ -333,10 +333,52 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	}
 
 	/**
-	 * @expectedException ProgrammesPlant\ProgrammesPlantNotFoundException
-	 * @expectedExceptionMessage thing/ not found, attempting to get http://127.0.0.1:8124/thing/
+	 * Feeder of HTTP codes for test.
+	 * 
+	 * The format is response to send, expected exception, expected exception message.
 	 */
-	public function testguzzle_requestThrowsExceptionWhen404IsRecieved()
+	public function HTTPExceptionsTestDataProvider()
+	{
+		return(array(
+
+			// 404
+			array(
+				"HTTP/1.1 404 Not Found\r\n=",
+				'ProgrammesPlant\ProgrammesPlantNotFoundException',
+				'thing/ not found, attempting to get http://127.0.0.1:8124/thing/'
+			),
+
+			// Other 40x series
+
+			// 403
+			array(
+				"HTTP/1.1 403 Forbidden\r\n",
+				"ProgrammesPlant\ProgrammesPlantRequestException",
+				"Request failed for http://127.0.0.1:8124/thing/, error code 403"
+			),
+
+			// Another just for luck - 408
+			array(
+				"HTTP/1.1 408 Request Time Out\r\n",
+				"ProgrammesPlant\ProgrammesPlantRequestException",
+				"Request failed for http://127.0.0.1:8124/thing/, error code 408"
+			),
+
+			// 5xx series
+
+			// 500
+			array(
+				"HTTP/1.1 500 Internal Server Error\r\n",
+				'ProgrammesPlant\ProgrammesPlantRequestException',
+				'Request failed for http://127.0.0.1:8124/thing/  - no cache.'
+			),
+		));
+	}
+
+	/**
+	 * @dataProvider HTTPExceptionsTestDataProvider
+	 */
+	public function testguzzle_requestThrowsExceptionsOnFailureModes($response, $exception, $exception_message)
 	{
 		$server = $this->getServer();
 		$server->flush();
@@ -344,9 +386,11 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp = new PP($server->getUrl());
 
 		$server->enqueue(array(
-			"HTTP/1.1 404 Not Found\r\n",
+			$response
 		));
 
+		$this->setExpectedException($exception, $exception_message);
+		
 		$pp->guzzle_request('thing/');
 	}
 
