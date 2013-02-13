@@ -344,7 +344,11 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp = new PP($server->getUrl());
 
 		$server->enqueue(array(
-			"HTTP/1.1 404 Not Found",
+			"HTTP/1.1 404 Not Found\r\n",
+		));
+
+		$pp->guzzle_request('thing/');
+	}
 		));
 
 		$pp->guzzle_request('thing/');
