@@ -332,4 +332,22 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
         $pp->make_request('here');
 	}
 
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantNotFoundException
+	 * @expectedExceptionMessage thing/ not found, attempting to get http://127.0.0.1:8124/thing/
+	 */
+	public function testguzzle_requestThrowsExceptionWhen404IsRecieved()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+
+		$server->enqueue(array(
+			"HTTP/1.1 404 Not Found",
+		));
+
+		$pp->guzzle_request('thing/');
+	}
+
 }
