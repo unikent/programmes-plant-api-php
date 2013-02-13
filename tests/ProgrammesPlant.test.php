@@ -385,9 +385,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 		$pp = new PP($server->getUrl());
 
-		$server->enqueue(array(
-			$response
-		));
+		$server->enqueue($response);
 
 		$this->setExpectedException($exception, $exception_message);
 		
