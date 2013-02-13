@@ -286,6 +286,12 @@ class API
 			// Work out which exception to throw based on cURL error code.
 			switch ($e->getErrorNo()) 
 			{
+				// Could Not Resolve Proxy
+				// Provided proxy server is not functioning.
+				case 5:
+					throw new ProxyNotFound('Proxy server ' . $this->proxy_server . ' could not be found, DNS lookup failed.');
+				break;
+
 				// Could Not Resolve Host
 				// Likely the API is down due to some misconfiguration.
 				case 6:
@@ -417,5 +423,7 @@ class ProgrammesPlantRequestException extends \Exception {}
 class ProgrammesPlantServerNotFound extends \Exception {}
 
 class CurlException extends \Exception {}
+
+class ProxyNotFound extends \Exception {}
 
 class ProgrammesPlantNotFoundException extends \Exception {}

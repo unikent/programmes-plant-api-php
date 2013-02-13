@@ -420,4 +420,17 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp->guzzle_request('/');
 	}
 
+	/**
+	 * Throw an error when we have a rubbish proxy.
+	 * 
+	 * @expectedException ProgrammesPlant\ProxyNotFound
+	 * @expectedExceptionMessage Proxy server http://this.is.not.a.proxy.server.at.all could not be found, DNS lookup failed.
+	 */
+	public function testguzzle_requestThrowsExceptionOnCurlProxyProblem()
+	{
+		$pp = new PP('http://example.com');
+		$pp->set_proxy('http://this.is.not.a.proxy.server.at.all');
+
+		$pp->guzzle_request('/');
+	}
 }
