@@ -349,6 +349,20 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 		$pp->guzzle_request('thing/');
 	}
+
+	/**
+	 * @expectedException ProgrammesPlant\ProgrammesPlantRequestException
+	 * @expectedExceptionMessage Request failed for http://127.0.0.1:8124/thing/, error code 403
+	 */
+	public function testguzzle_requestThrowsExceptionWhenOther40xCodeRecieved()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+
+		$server->enqueue(array(
+			"HTTP/1.1 403 Forbidden\r\n"
 		));
 
 		$pp->guzzle_request('thing/');
