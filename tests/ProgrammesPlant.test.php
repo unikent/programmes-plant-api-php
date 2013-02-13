@@ -31,7 +31,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	 */
 	public static function wipe_directory($directory, $empty = true)
 	{
-    	if (substr($directory,-1) == '/')
+    	if (substr($directory, -1) == '/')
     	{
         	$directory = substr($directory,0,-1);
     	}
