@@ -283,16 +283,15 @@ class API
 		// cURL Related Exception
 		catch (\Guzzle\Http\Exception\CurlException $e)
 		{
-			// Server Not Found
+			// Could Not Resolve Host
 			// Likely the API is down due to some misconfiguration.
-			// Attempt to get from cache or throw an exception.
 			if ($e->getErrorNo() == 6)
 			{
-				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down?');
+				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found, DNS lookup failed - is this address correct?');
 			}
 			else
 			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. Guzzle reports ' . $e->getMessage());
+				throw new CurlException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. cURL error ' . $e->getErrorNo());
 			}
 		}
 
@@ -413,5 +412,7 @@ class ProgrammesPlantException extends \Exception {}
 class ProgrammesPlantRequestException extends \Exception {}
 
 class ProgrammesPlantServerNotFound extends \Exception {}
+
+class CurlException extends \Exception {}
 
 class ProgrammesPlantNotFoundException extends \Exception {}

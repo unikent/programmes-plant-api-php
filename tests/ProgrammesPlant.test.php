@@ -395,21 +395,29 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	}
 
 	/**
-	 * @expectedException ProgrammesPlant\ProgrammesPlantRequestException
-	 * @expectedExceptionMessage Request failed for http://127.0.0.1:8124/thing/, error code 403
+	 * Test for failure to resolve host.
+	 * 
+	 * @expectedException ProgrammesPlant\ProgrammesPlantServerNotFound
+	 * @expectedExceptionMessage http://this.url.does.not.exist/forsure not found, DNS lookup failed - is this address correct?
 	 */
-	public function testguzzle_requestThrowsExceptionWhenOther40xCodeRecieved()
+	public function testguzzle_requestThrowsExceptionWhenServerIsDown()
 	{
-		$server = $this->getServer();
-		$server->flush();
+		$pp = new PP('http://this.url.does.not.exist/forsure/');
 
-		$pp = new PP($server->getUrl());
+		$pp->guzzle_request('/');
+	}
 
-		$server->enqueue(array(
-			"HTTP/1.1 403 Forbidden\r\n"
-		));
+	/**
+	 * Cause some other random cURL error - a malformed URL.
+	 * 
+	 * @expectedException ProgrammesPlant\CurlException
+	 * @expecetedException Request failed for this@not$$$URL, problem is with cuRL. cURL error 3
+	 */
+	public function testguzzle_requestThrowsExceptionOnUnknownCurlProblem()
+	{
+		$pp = new PP('this@not$$$URL');
 
-		$pp->guzzle_request('thing/');
+		$pp->guzzle_request('/');
 	}
 
 }
