@@ -283,15 +283,18 @@ class API
 		// cURL Related Exception
 		catch (\Guzzle\Http\Exception\CurlException $e)
 		{
-			// Could Not Resolve Host
-			// Likely the API is down due to some misconfiguration.
-			if ($e->getErrorNo() == 6)
+			// Work out which exception to throw based on cURL error code.
+			switch ($e->getErrorNo()) 
 			{
-				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found, DNS lookup failed - is this address correct?');
-			}
-			else
-			{
-				throw new CurlException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. cURL error ' . $e->getErrorNo());
+				// Could Not Resolve Host
+				// Likely the API is down due to some misconfiguration.
+				case 6:
+					throw new ProgrammesPlantServerNotFound($this->api_target . ' not found, DNS lookup failed - is this address correct?');
+				break;
+				
+				default:
+					throw new CurlException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. cURL error ' . $e->getErrorNo());
+				break;
 			}
 		}
 
