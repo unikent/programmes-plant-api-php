@@ -316,13 +316,13 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$server = $this->getServer();
 		$server->flush();
 
-		$pp = new PP($this->getServer()->getUrl());
+		$pp = new PP($server->getUrl());
 
 		$payload = 'This is not JSON';
 		$size = strlen($payload);
 
 		// Enqueue the HTTP session.
- 		$this->getServer()->enqueue(array(
+ 		$server->enqueue(array(
             "HTTP/1.1 200 OK\r\n" .
             'Date: ' . Utils::getHttpDate('now') . "\r\n" .
             "Last-Modified: Mon, 12 Nov 2012 02:53:38 GMT\r\n" .
