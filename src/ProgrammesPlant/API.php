@@ -66,11 +66,6 @@ class API
 	public $request = false;
 
 	/**
-	 * The last response.
-	 */
-	public $last_response = false;
-
-	/**
 	 * Directory of the cache.
 	 */
 	public $cache_directory;
@@ -233,7 +228,7 @@ class API
 
 		try 
 		{
-			$this->last_response = $this->request->send();
+			$this->request->send();
 		}
 
 		/**
@@ -304,7 +299,7 @@ class API
 			}
 		}
 
-		return $this->last_response;	
+		return $this->request->getResponse();
 	}
 
 	/**
