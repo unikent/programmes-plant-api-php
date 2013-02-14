@@ -497,8 +497,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		// This should be from the cache.
 		$second_response = $pp->make_request('api/');
 
-		// This should use the cache, not HTTP so we should expect the server to be hit only twice:
-		// the third item in the queue should never be hit.
+		// This should use the cache, not HTTP so we should expect the server to be hit only twice.
 		$this->assertEquals(2, count($server->getReceivedRequests()));
 
 		// Last request is actually served from the cache.
