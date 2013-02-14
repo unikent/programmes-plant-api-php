@@ -92,6 +92,15 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function tearDown()
 	{
 		$this->wipe_directory(static::$cache_directory);
+		$this->getServer()->flush();
+	}
+
+	/**
+	 * Create a new instance of the Programmes Plant API that connects to Node.js server.
+	 */
+	private function setup_with_server()
+	{
+		return new PP($this->getServer()->getUrl());
 	}
 
 	public function test__constructSetsUpTarget()
@@ -289,7 +298,6 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testget_subjectMakesAHTTPRequest()
 	{
 		$server = $this->getServer();
-        $server->flush();
 
         $pp = new PP($this->getServer()->getUrl());
  		
@@ -314,7 +322,6 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testmake_requestThrowsExceptionWhenResponseIsNotJSON()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
 		$pp = new PP($server->getUrl());
 
@@ -381,9 +388,8 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testguzzle_requestThrowsExceptionsOnFailureModes($response, $exception, $exception_message)
 	{
 		$server = $this->getServer();
-		$server->flush();
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 
 		$server->enqueue($response);
 
@@ -435,7 +441,6 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testServesFromCacheWhenServerIsDownWithA5xxError() 
 	{
 		$server = $this->getServer();
-		$server->flush();
 
 		$data = array('thing' => 'thing');
 		$payload = json_encode($data);
@@ -451,7 +456,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
             "Date: " . Utils::getHttpDate('now') . "\r\n"
 		));
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		// This should put a request into the cache.
@@ -469,7 +474,6 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testCachePolicyRespondsTo301Correctly()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
 		$data = array('thing' => 'thing');
 		$payload = json_encode($data);
@@ -484,7 +488,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
             "HTTP/1.1 304 NOT MODIFIED\r\n"
 		));
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		// This should put a request into the cache.
@@ -504,9 +508,8 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testCacheServesWhenCacheControlPublicIsSet()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		$data = array('thing' => 'thing');
@@ -540,9 +543,8 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testCacheRefreshesWhenMaxAgeIsExceeded()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		$data = array('thing' => 'thing');
@@ -574,9 +576,8 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testCacheDoesNotRefreshWhenMaxAgeIsNotExceeded()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		$data = array('thing' => 'thing');
@@ -609,9 +610,8 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function testCacheRefreshesWhenModificationDateIsChangedAndCacheHasExpired()
 	{
 		$server = $this->getServer();
-		$server->flush();
 
-		$pp = new PP($server->getUrl());
+		$pp = $this->setup_with_server();
 		$pp->with_cache('file')->directory(static::$cache_directory);
 
 		$data = array('thing' => 'thing');
