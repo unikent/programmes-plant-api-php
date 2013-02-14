@@ -431,4 +431,212 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 		$pp->guzzle_request('');
 	}
+
+	public function testServesFromCacheWhenServerIsDownWithA5xxError() 
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+            "Last-Modified: " . Utils::getHttpDate('-10 days') . "\r\n" .
+            "Date: " . Utils::getHttpDate('-1 hour') . "\r\n" .
+            "Cache-Control: must-revalidate \r\n" .
+            'Content-Length: ' . strlen($payload) . "\r\n\r\n$payload",
+
+            "HTTP/1.1 500 Internal Server Error\r\n" .
+            "Date: " . Utils::getHttpDate('now') . "\r\n"
+		));
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		// This should put a request into the cache.
+		$first_response = $pp->make_request('api/');
+
+		$second_response = $pp->make_request('api/');
+
+		$this->assertEquals($first_response, $second_response);
+
+		$this->assertEquals(2, count($server->getReceivedRequests()));
+
+		$this->assertEquals(500, $pp->request->getResponse()->getStatusCode());
+	}
+
+	public function testCachePolicyRespondsTo301Correctly()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		// Set it up to be last modified in the past.
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+            "Last-Modified: " . Utils::getHttpDate('-100 hours') . "\r\n" .
+            "Cache-Control: public, must-revalidate \r\n" .
+            'Content-Length: ' . strlen($payload) . "\r\n\r\n$payload",
+
+            "HTTP/1.1 304 NOT MODIFIED\r\n"
+		));
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		// This should put a request into the cache.
+		$first_response = $pp->make_request('api/');
+
+		// This should be from the cache.
+		$second_response = $pp->make_request('api/');
+
+		// This should use the cache, not HTTP so we should expect the server to be hit only twice:
+		// the third item in the queue should never be hit.
+		$this->assertEquals(2, count($server->getReceivedRequests()));
+
+		// Last request is actually served from the cache.
+		$this->assertTrue($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
+	public function testCacheServesWhenCacheControlPublicIsSet()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		// Set it up to be last modified in the past.
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+            "Last-Modified: " . Utils::getHttpDate('-1 hours') . "\r\n" .
+            'Cache-Control: public' . "\r\n" . 
+            'Content-Length: ' . strlen($payload) . "\r\n\r\n$payload",
+
+            "HTTP/1.1 200 OK\r\n" .
+            'Cache-Control: public' . "\r\n" . 
+            'Content-Length: ' . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		// This should put a request into the cache.
+		$first_response = $pp->make_request('api/');
+
+		// This should get the request from the cache.
+		$second_response = $pp->make_request('api/');
+
+		// This should use the cache, not HTTP so we should expect the server not to be hit.
+		$this->assertEquals(1, count($server->getReceivedRequests()));
+
+		// Last request is served from the cache.
+		$this->assertTrue($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
+	public function testCacheRefreshesWhenMaxAgeIsExceeded()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('-11 minutes') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Cache-Control: max-age=600 \r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload",
+
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		// Put a request into the cache.
+		$first_response = $pp->make_request('api/');
+
+		$second_response = $pp->make_request('api/');
+
+		$this->assertEquals(2, count($server->getReceivedRequests()));
+
+		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
+	public function testCacheDoesNotRefreshWhenMaxAgeIsNotExceeded()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('-8 minutes') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Cache-Control: max-age=600 \r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload",
+
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		// Put a request into the cache
+		$first_response = $pp->make_request('api/');
+
+		// This should get served out of the cache.
+		$second_response = $pp->make_request('api/');
+
+		$this->assertEquals(1, count($server->getReceivedRequests()));
+
+		$this->assertTrue($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
+	public function testCacheRefreshesWhenModificationDateIsChangedAndCacheHasExpired()
+	{
+		$server = $this->getServer();
+		$server->flush();
+
+		$pp = new PP($server->getUrl());
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('-1 hour') . "\r\n" . 
+			"Last-Modified: " . Utils::getHttpDate('January 1 2011') . "\r\n" .
+			"Cache-Control: max-age=600 \r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload",
+
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('January 14 2011') . "\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		$pp->make_request('api/');
+
+		$pp->make_request('api/');
+
+		$this->assertEquals(2, count($server->getReceivedRequests()));
+
+		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
 }
