@@ -311,7 +311,7 @@ class API
 	public function make_request($api_method)
 	{
 		try
-		{
+		{			
 			return $this->guzzle_request($api_method)->json();
 		}
 		
