@@ -21,7 +21,7 @@ class API
 	/**
 	 * Persists the cURL object.
 	 */
-	public $guzzle_client = false;
+	protected $guzzle_client = false;
 
 	/**
 	 * The location the API is at.
@@ -51,6 +51,11 @@ class API
 	public $cache = false;
 
 	/**
+	 * The cache plugin object.
+	 */
+	public $cache_plugin = false;
+
+	/**
 	 * The cache object itself.
 	 */
 	public $cache_object = false;
@@ -59,11 +64,6 @@ class API
 	 * The current request object for Guzzle.
 	 */
 	public $request = false;
-
-	/**
-	 * The last response.
-	 */
-	public $last_response = false;
 
 	/**
 	 * Directory of the cache.
@@ -81,7 +81,7 @@ class API
 	{
 		if (! $api_target)
 		{
-			throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified");
+			throw new ProgrammesPlantException("No Endpoint for Programmes Plant API specified.");
 		}
 
 		// Remove trailing slash as this sometimes causes a 404 with cURL
@@ -99,7 +99,7 @@ class API
 	{
 		if (strpos($type, 'memory') === false && strpos($type, 'file') === false)
 		{
-			throw new ProgrammesPlantException("$this->cache is not a supported cache type");
+			throw new ProgrammesPlantException("$type is not a supported cache type.");
 		}
 
 		$this->cache = $type;
@@ -121,7 +121,7 @@ class API
 
 		if (! is_dir($directory))
 		{
-			throw new ProgrammesPlantException("Directory does not exist");
+			throw new ProgrammesPlantException("Directory does not exist.");
 		}
 
 		$this->cache_directory = $directory;
@@ -173,12 +173,11 @@ class API
 	}
 
 	/**
-	* Runs the request against the API.
-	*
-	* @param string $url The API endpoint to send a request to.
-	* @return string $response The response object.
-	*/
-	public function guzzle_request($url)
+	 * Prepare the Guzzle object for a request.
+	 * 
+	 * @return $this Self object for chaining.
+	 */
+	public function prepare()
 	{
 		if (! $this->guzzle_client)
 		{
@@ -190,7 +189,7 @@ class API
 				{
 					if (! $this->cache_directory)
 					{
-						throw new ProgrammesPlantException("No cache directory set");
+						throw new ProgrammesPlantException("No cache directory set.");
 					}
 
 					$this->cache_object = new FilesystemCache($this->cache_directory);
@@ -202,21 +201,34 @@ class API
 
 				$adapter = new DoctrineCacheAdapter($this->cache_object);
 
-				$cache_plugin = new CachePlugin(
+				$this->cache_plugin = new CachePlugin(
 					array(
 	    				'adapter' => $adapter
 					)
 				);
 
-				$this->guzzle_client->addSubscriber($cache_plugin);
+				$this->guzzle_client->addSubscriber($this->cache_plugin);
 			}			
 		}
+
+		return $this;
+	}
+
+	/**
+	* Runs the request against the API.
+	*
+	* @param string $url The API endpoint to send a request to.
+	* @return string $response The response object.
+	*/
+	public function guzzle_request($url)
+	{
+		$this->prepare();
 
 		$this->request = $this->guzzle_client->get($url);
 
 		try 
 		{
-			$this->last_response = $this->request->send();
+			$this->request->send();
 		}
 
 		/**
@@ -242,36 +254,52 @@ class API
 		}
 
 		// 5xx Codes
-		// Attempt to respond with cache or throw an error.
+		// Attempt to respond with cache or throws an error.
 		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
 		{
-			$cached = $this->serve_from_cache();
-
-			if (! $cached)
+			// Obtain from cache.
+			if ($this->cache)
 			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache. Guzzle reports ' . $e->getMessage());
-			}
+				$cached = $this->serve_from_cache();
 
-			return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
+				if (! $cached)
+				{
+					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - attempted to serve from cache but not found.');
+				}
+
+				return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
+			}
+			else
+			{
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache.');
+			}
 		}
 
 		// cURL Related Exception
 		catch (\Guzzle\Http\Exception\CurlException $e)
 		{
-			// Server Not Found
-			// Likely the API is down due to some misconfiguration.
-			// Attempt to get from cache or throw an exception.
-			if ($e->getErrorNo() == 6)
+			// Work out which exception to throw based on cURL error code.
+			switch ($e->getErrorNo()) 
 			{
-				throw new ProgrammesPlantServerNotFound($this->api_target . ' not found - is the Programmes Plant API down?');
-			}
-			else
-			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. Guzzle reports ' . $e->getMessage());
+				// Could Not Resolve Proxy
+				// Provided proxy server is not functioning.
+				case 5:
+					throw new ProxyNotFound('Proxy server ' . $this->proxy_server . ' could not be found, DNS lookup failed.');
+				break;
+
+				// Could Not Resolve Host
+				// Likely the API is down due to some misconfiguration.
+				case 6:
+					throw new ProgrammesPlantServerNotFound($this->api_target . ' not found, DNS lookup failed - is this address correct?');
+				break;
+				
+				default:
+					throw new CurlException('Request failed for ' . $this->api_target . '/' . $url . ', problem is with cuRL. cURL error ' . $e->getErrorNo());
+				break;
 			}
 		}
 
-		return $this->last_response;	
+		return $this->request->getResponse();
 	}
 
 	/**
@@ -282,16 +310,17 @@ class API
 	*/
 	public function make_request($api_method)
 	{
-		$response = $this->guzzle_request($api_method);
-		
-		$payload = json_decode($response->getBody());
-
-		if (! $response)
+		try
 		{
-			throw new ProgrammesPlantException("Response from $url was not valid JSON");
+			return $this->guzzle_request($api_method)->json();
 		}
+		
+		// Catch exception in case where JSON in invalid.
+	 	catch (\Guzzle\Common\Exception\RuntimeException $e)
+	 	{
+	 		throw new ProgrammesPlantException("Response was not valid JSON and could not be decoded.");
+	 	}
 
-	 	return $payload;
 	 }
 
 	 /**
@@ -398,5 +427,9 @@ class ProgrammesPlantException extends \Exception {}
 class ProgrammesPlantRequestException extends \Exception {}
 
 class ProgrammesPlantServerNotFound extends \Exception {}
+
+class CurlException extends \Exception {}
+
+class ProxyNotFound extends \Exception {}
 
 class ProgrammesPlantNotFoundException extends \Exception {}
