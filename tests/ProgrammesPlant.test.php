@@ -639,4 +639,23 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
 	}
 
+	public function testReturnsArrayByDefault()
+	{
+		$mock = $this->getMock('ProgrammesPlant\API', array('guzzle_request'), array('http://example.com'));
+
+		$data = array('Thing' => 'Something');
+
+		$mock->expects($this->once())
+			 ->method('guzzle_request')
+			 ->with($this->equalTo('2012/undergraduate/programmes/1'))
+			 ->will($this->returnValue(json_encode($data)));
+
+		// Ensure that we actually mock a request object,
+		// otherwise this is going to be silly
+
+		$response = $mock->get_programme(2012, 'undergraduate', 1);
+
+		$this->assertFalse(is_null(json_decode($response)), 'JSON was not returned when asked for.');
+	}
+
 }
