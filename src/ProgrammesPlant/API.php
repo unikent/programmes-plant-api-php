@@ -173,6 +173,22 @@ class API
 	}
 
 	/**
+	 * Tell us if the last request was served from the cache.
+	 * 
+	 * @param  Request $request The Request object to check this for - defaults to the last request.
+	 * @return bool If the last request was served from the cache.
+	 */
+	public function served_from_cache($request = false)
+	{
+		if (! $request)
+		{
+			$request = $this->request;
+		}
+
+		return $request->getResponse()->hasHeader('X-Guzzle-Cache');
+	}
+
+	/**
 	 * Prepare the Guzzle object for a request.
 	 * 
 	 * @return $this Self object for chaining.

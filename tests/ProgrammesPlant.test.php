@@ -707,6 +707,37 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
 	}
 
+	public function testserved_from_cache()
+	{
+		// Setup a response that would be served from cache.
+		$server = $this->getServer();
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		// Set it up to be last modified in the past.
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+            "Last-Modified: " . Utils::getHttpDate('-100 hours') . "\r\n" .
+            "Cache-Control: public \r\n" .
+            'Content-Length: ' . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		$pp = $this->setup_with_server();
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		// This should put a request into the cache.
+		$first_response = $pp->make_request('api/');
+
+		// This should be from the cache.
+		$second_response = $pp->make_request('api/');
+
+		// Served from cache - one request!
+		$this->assertEquals(1, count($server->getReceivedRequests()));
+
+		$this->assertTrue($pp->served_from_cache());
+	}
+
 	private function setup_basic_payload()
 	{
 		$payload = json_encode(array('Thing' => 'Something'));
