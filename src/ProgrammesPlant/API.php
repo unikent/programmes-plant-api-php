@@ -324,8 +324,9 @@ class API
 	/**
 	* Runs a request against the Programmes Plant API.
 	* 
-	* @param $url              The API method.
-	* @return class $response  The de-JSONified response from the API.
+	* @param  string $url       The API method.
+	* @param  string $as        Variable type to return - object, array or raw.
+	* @return class  $response  The response in the format specified.
 	*/
 	public function make_request($api_method, $as = 'object')
 	{
@@ -362,6 +363,7 @@ class API
 	  * @param int $year The year of the programme to get.
 	  * @param string $level Either undergraduate or post-graduate.
 	  * @param int $id The ID of the programme to get.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programme as an object.
 	  */ 
 	 public function get_programme($year, $level, $id, $as = 'object')
@@ -379,6 +381,7 @@ class API
 	  * 
 	  * @param int $year The year of the programme index to get.
 	  * @param string $level Either undergraduate for post-graduate.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programmes index as an object.
 	  */
 	 public function get_programmes_index($year, $level, $as = 'object')
@@ -396,6 +399,7 @@ class API
 	  * 
 	  * @param int $year The year of programmes to get.
 	  * @param string $level Either undergraduate or post-graduate.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return array $response The subject index as an array.
 	  */ 
 	 public function get_subject_index($year, $level, $as = 'object')
@@ -412,6 +416,7 @@ class API
 	  * Get an "unpublished" preview programme from the Programmes Plant API
 	  * 
 	  * @param string $hash Unique identifier for preview snapshot.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programme as an object.
 	  */ 
 	 public function get_preview_programme($hash, $as = 'object')
@@ -421,7 +426,8 @@ class API
 	 
 	 /**
 	  * Get subject categories list from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
 	 public function get_subjectcategories($as = 'object')
@@ -431,7 +437,8 @@ class API
 	 
 	 /**
 	  * Get schools list from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
 	 public function get_schools($as = 'object')
@@ -442,6 +449,7 @@ class API
 	 /**
 	  * Get faculties list from the API.
 	  * 
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
 	 public function get_faculties($as = 'object')
@@ -452,6 +460,7 @@ class API
 	 /**
 	  * Get campuses list from the API.
 	  * 
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
 	 public function get_campuses($as = 'object')
@@ -461,7 +470,8 @@ class API
 	 
 	 /**
 	  * Get subject leaflets from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
 	 public function get_subject_leaflets($as = 'object')
