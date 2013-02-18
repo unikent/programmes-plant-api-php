@@ -707,25 +707,213 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
 	}
 
-
-	public function testReturnsArrayByDefault()
+	private function setup_basic_payload()
 	{
-		$mock = $this->getMock('ProgrammesPlant\API', array('guzzle_request'), array('http://example.com'));
+		$payload = json_encode(array('Thing' => 'Something'));
 
-		$data = array('Thing' => 'Something');
+		$server = $this->getServer();
 
-		$mock->expects($this->once())
-			 ->method('guzzle_request')
-			 ->with($this->equalTo('2012/undergraduate/programmes/1'))
-			 ->will($this->returnValue(json_encode($data)));
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" . 
+			"Last-Modified: " . Utils::getHttpDate('-1 hours') . "\r\n" .
+			"Cache-Control: max-age=600 \r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n" . $payload
+		));
 
-		// Ensure that we actually mock a request object,
-		// otherwise this is going to be silly
+	}
 
-		$response = $mock->get_programme(2012, 'undergraduate', 1);
+	public function testmake_requestReturnsObjectByDefault()
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
 
-		$this->assertFalse(is_null(json_decode($response)), 'JSON was not returned when asked for.');
+		$this->assertTrue(is_object($pp->make_request('')));
+	}
+
+	public function testmake_requestReturnsArray()
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+
+		$this->assertTrue(is_array($pp->make_request('', 'array')));
+	}
+
+	public function testmake_requestReturnsRawJSON()
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+
+		$payload = json_decode($pp->make_request('', 'raw'));
+
+		$this->assertNotNull($payload);
+	}
+
+	public function ReturnsMethodProvider()
+	{
+		return array(
+			array('get_programme', true),
+			array('get_programmes_index'),
+			array('get_subject_index'),
+			array('get_subjectcategories', false, true),
+			array('get_schools', false, true),
+			array('get_faculties', false, true),
+			array('get_campuses', false, true),
+			array('get_subject_leaflets', false, true),
+			array('get_preview_programme')
+		);
+	}
+
+	/**
+	 * @dataProvider ReturnsMethodProvider
+	 */
+	public function testMethodsReturnObjectByDefault($method, $id = false, $single_pass = false)
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+
+		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}(111);
+		}
+		elseif ($single_pass)
+		{
+			$payload = $pp->{$method}();
+		}
+		elseif ($id)
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', $id);
+		}
+		else 
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate');
+		}
+
+		
+		$this->assertTrue(is_object($payload));
+	}
+
+	/**
+	 * @dataProvider ReturnsMethodProvider
+	 */
+	public function testMethodsReturnArray($method, $id = false, $single_pass = false)
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+		
+		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}(111, 'array');
+		}
+		elseif ($single_pass)
+		{
+			$payload = $pp->{$method}('array');
+		}
+		elseif ($id)
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'array');
+		}
+		else 
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', 'array');
+		}
+		
+		$this->assertTrue(is_array($payload));
+	}
+
+	/**
+	 * @dataProvider ReturnsMethodProvider
+	 */
+	public function testMethodsReturnObject($method, $id = false, $single_pass = false)
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+		
+		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}(111, 'object');
+		}
+		elseif ($single_pass)
+		{
+			$payload = $pp->{$method}('object');
+		}
+		elseif ($id)
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'object');
+		}
+		else 
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', 'object');
+		}
+
+		
+		$this->assertTrue(is_object($payload));
+	}
+
+	/**
+	 * @dataProvider ReturnsMethodProvider
+	 */
+	public function testMethodsReturnRawJSON($method, $id = false, $single_pass = false)
+	{
+		$this->setup_basic_payload();
+		$pp = $this->setup_with_server();
+		
+		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}(111, 'raw');
+		}
+		elseif ($single_pass)
+		{
+			$payload = $pp->{$method}('raw');
+		}
+		elseif ($id)
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'raw');
+		}
+		else 
+		{
+			$payload = $pp->{$method}(2014, 'undergraduate', 'raw');
+		}
+
+		
+		$this->assertNotNull(json_decode($payload));
+	}
+
+	public function testjson_decodeReturnsArray()
+	{
+		$pp = new PP('http://example.com');
+
+		$json = json_encode(array('Test' => 'test'));
+
+		$this->assertTrue(is_array($pp->json_decode($json, true)));
+	}
+
+	public function testjson_decodeReturnsObject()
+	{
+		$pp = new PP('http://example.com');
+
+		$json = json_encode(array('Test' => 'test'));
+
+		$this->assertTrue(is_object($pp->json_decode($json, false)));
+	}
+
+	public function testjson_decodeReturnsObjectByDefault()
+	{
+		$pp = new PP('http://example.com');
+
+		$json = json_encode(array('Test' => 'test'));
+
+		$this->assertTrue(is_object($pp->json_decode($json)));
+	}
+
+	/**
+     * @expectedException ProgrammesPlant\JSONDecode
+     */
+	public function testjson_decodeThrowsExceptionOnInvalidJSON()
+	{
+		$pp = new PP('http://example.com');
+
+		$pp->json_decode('We cannot decode invalid JSON');
 	}
 
 }
-
