@@ -10,7 +10,7 @@
         "doctrine/cache": "dev-master"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "3.7.*@dev"
     },
     "authors": [
         {

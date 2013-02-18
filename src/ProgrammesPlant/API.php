@@ -303,20 +303,54 @@ class API
 	}
 
 	/**
+	 * JSON decode, but throws exceptions on false JSON.
+	 *	
+	 * @param string $json A JSON string.
+	 * @param bool $as_array Return as array if true.
+	 * @return array|object $json The JSON converted.
+	 */
+	public function json_decode($json, $as_array = false)
+	{
+		$json = json_decode($json, $as_array);
+
+		if (is_null($json))
+		{
+			throw new JSONDecode('We cannot decode invalid JSON');
+		}
+
+		return $json;
+	}
+
+	/**
 	* Runs a request against the Programmes Plant API.
 	* 
-	* @param $url              The API method.
-	* @return class $response  The de-JSONified response from the API.
+	* @param  string $url       The API method.
+	* @param  string $as        Variable type to return - object, array or raw.
+	* @return class  $response  The response in the format specified.
 	*/
-	public function make_request($api_method)
+	public function make_request($api_method, $as = 'object')
 	{
 		try
 		{
-			return $this->guzzle_request($api_method)->json();
+			$payload = $this->guzzle_request($api_method)->getBody();
+
+			if ($as == 'array')
+			{
+				return $this->json_decode($payload, true);
+			}
+			else if ($as == 'raw')
+			{
+				return $payload;
+			}
+			// By default return an object.
+			else
+			{
+				return $this->json_decode($payload);
+			}
 		}
 		
 		// Catch exception in case where JSON in invalid.
-	 	catch (\Guzzle\Common\Exception\RuntimeException $e)
+	 	catch (JSONDecode $e)
 	 	{
 	 		throw new ProgrammesPlantException("Response was not valid JSON and could not be decoded.");
 	 	}
@@ -329,16 +363,17 @@ class API
 	  * @param int $year The year of the programme to get.
 	  * @param string $level Either undergraduate or post-graduate.
 	  * @param int $id The ID of the programme to get.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programme as an object.
 	  */ 
-	 public function get_programme($year, $level, $id)
+	 public function get_programme($year, $level, $id, $as = 'object')
 	 {
 	 	if ($level != 'undergraduate' && $level != 'postgraduate')
 	 	{
 	 		throw new InvalidArgument("Invalid argument specified for get_programme - level must be undergraduate or postgraduate");
 	 	}
 
-	 	return $this->make_request("$year/$level/programmes/$id");
+	 	return $this->make_request("$year/$level/programmes/$id", $as);
 	 }
 
 	 /**
@@ -346,16 +381,17 @@ class API
 	  * 
 	  * @param int $year The year of the programme index to get.
 	  * @param string $level Either undergraduate for post-graduate.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programmes index as an object.
 	  */
-	 public function get_programmes_index($year, $level)
+	 public function get_programmes_index($year, $level, $as = 'object')
 	 {
 	 	if ($level != 'undergraduate' && $level != 'postgraduate')
 	 	{
 	 		throw new InvalidArgument("Invalid argument specified for get_programmes_index - level must be undergraduate or postgraduate");
 	 	}
 
-	 	return $this->make_request("$year/$level/programmes");
+	 	return $this->make_request("$year/$level/programmes", $as);
 	 }
 	 
 	 /**
@@ -363,77 +399,84 @@ class API
 	  * 
 	  * @param int $year The year of programmes to get.
 	  * @param string $level Either undergraduate or post-graduate.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return array $response The subject index as an array.
 	  */ 
-	 public function get_subject_index($year, $level)
+	 public function get_subject_index($year, $level, $as = 'object')
 	 {
 	 	if ($level != 'undergraduate' && $level != 'postgraduate')
 	 	{
 	 		throw new InvalidArgument("Invalid argument specified for get_subject_index - level must be undergraduate or postgraduate");
 	 	}
 
-	 	return $this->make_request("$year/$level/subjects");
+	 	return $this->make_request("$year/$level/subjects", $as);
 	 }
 	 
 	 /**
 	  * Get an "unpublished" preview programme from the Programmes Plant API
 	  * 
 	  * @param string $hash Unique identifier for preview snapshot.
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response The programme as an object.
 	  */ 
-	 public function get_preview_programme($hash)
+	 public function get_preview_programme($hash, $as = 'object')
 	 {
-	 	return $this->make_request("preview/$hash");
+	 	return $this->make_request("preview/$hash", $as);
 	 }
 	 
 	 /**
 	  * Get subject categories list from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
-	 public function get_subjectcategories()
+	 public function get_subjectcategories($as = 'object')
 	 {
-	 	return $this->make_request("subjectcategories");
+	 	return $this->make_request("subjectcategories", $as);
 	 }
 	 
 	 /**
 	  * Get schools list from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
-	 public function get_schools()
+	 public function get_schools($as = 'object')
 	 {
-	 	return $this->make_request("schools");
+	 	return $this->make_request("schools", $as);
 	 }
 	 
 	 /**
 	  * Get faculties list from the API.
 	  * 
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
-	 public function get_faculties()
+	 public function get_faculties($as = 'object')
 	 {
-	 	return $this->make_request("faculties");
+	 	return $this->make_request("faculties", $as);
 	 }
 	 
 	 /**
 	  * Get campuses list from the API.
 	  * 
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
-	 public function get_campuses()
+	 public function get_campuses($as = 'object')
 	 {
-	 	return $this->make_request("campuses");
+	 	return $this->make_request("campuses", $as);
 	 }
 	 
 	 /**
 	  * Get subject leaflets from the API.
-	  * 
+	  *
+	  * @param string $as Variable type to return - object, array or raw.
 	  * @return object $response
 	  */ 
-	 public function get_subject_leaflets()
+	 public function get_subject_leaflets($as = 'object')
 	 {
-	 	return $this->make_request("leaflets");
+	 	return $this->make_request("leaflets", $as);
 	 }
 }
 
@@ -448,5 +491,7 @@ class InvalidArgument extends \Exception {}
 class CurlException extends \Exception {}
 
 class ProxyNotFound extends \Exception {}
+
+class JSONDecode extends \Exception {}
 
 class ProgrammesPlantNotFoundException extends \Exception {}
