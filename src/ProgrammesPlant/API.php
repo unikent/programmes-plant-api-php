@@ -333,6 +333,11 @@ class API
 	  */ 
 	 public function get_programme($year, $level, $id)
 	 {
+	 	if ($level != 'undergraduate' && $level != 'postgraduate')
+	 	{
+	 		throw new InvalidArgument("Invalid argument specified for get_programme - level must be undergraduate or postgraduate");
+	 	}
+
 	 	return $this->make_request("$year/$level/programmes/$id");
 	 }
 
@@ -345,6 +350,11 @@ class API
 	  */
 	 public function get_programmes_index($year, $level)
 	 {
+	 	if ($level != 'undergraduate' && $level != 'postgraduate')
+	 	{
+	 		throw new InvalidArgument("Invalid argument specified for get_programmes_index - level must be undergraduate or postgraduate");
+	 	}
+
 	 	return $this->make_request("$year/$level/programmes");
 	 }
 	 
@@ -357,6 +367,11 @@ class API
 	  */ 
 	 public function get_subject_index($year, $level)
 	 {
+	 	if ($level != 'undergraduate' && $level != 'postgraduate')
+	 	{
+	 		throw new InvalidArgument("Invalid argument specified for get_subject_index - level must be undergraduate or postgraduate");
+	 	}
+
 	 	return $this->make_request("$year/$level/subjects");
 	 }
 	 
@@ -427,6 +442,8 @@ class ProgrammesPlantException extends \Exception {}
 class ProgrammesPlantRequestException extends \Exception {}
 
 class ProgrammesPlantServerNotFound extends \Exception {}
+
+class InvalidArgument extends \Exception {}
 
 class CurlException extends \Exception {}
 

@@ -127,6 +127,74 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$pp = new PP();
 	}
 
+	public function LevelTestDataProvider()
+	{
+		return array(
+			array('get_programmes_index'),
+			array('get_programme', true),
+			array('get_subject_index')
+		);
+	}
+
+	/**
+	 * @dataProvider LevelTestDataProvider
+	 */
+	public function testExceptionThrownWhenInvalidLevelIsSpecified($method, $id = false)
+	{
+		$pp = new PP('http://example.com');
+
+		$this->setExpectedException('ProgrammesPlant\InvalidArgument', "Invalid argument specified for $method - level must be undergraduate or postgraduate");
+
+		if ($id)
+		{
+			$pp->{$method}('2014', 'thing', 1);
+		}
+		else
+		{
+			$pp->{$method}('2014', 'thing');
+		}			
+	}
+
+	/**
+	 * @dataProvider LevelTestDataProvider
+	 */
+	public function testMakesRequestWhenArgumentsAreCorrect($method, $id = false)
+	{
+		foreach(array('undergraduate', 'postgraduate') as $level)
+		{
+			// Mock up the make_request method.
+			$mock = $this->getMock('ProgrammesPlant\API', array('make_request'),
+				array('http://example.com')
+			);
+
+	        if ($id)
+			{
+				$mock->expects($this->once())
+	                 ->method('make_request')
+	                 ->with($this->equalTo('2014/' . $level . '/programmes/1'));
+
+				$mock->{$method}('2014', $level, 1);
+			}
+			elseif ($method == 'get_subject_index')
+			{
+				$mock->expects($this->once())
+	                 ->method('make_request')
+	                 ->with($this->equalTo('2014/' . $level . '/subjects'));
+
+	            $mock->{$method}('2014', $level);
+			}
+			else
+			{
+				$mock->expects($this->once())
+	                 ->method('make_request')
+	                 ->with($this->equalTo('2014/' . $level . '/programmes'));
+
+				$mock->{$method}('2014', $level);
+			}
+		}
+		
+	}
+
 	public function testSetProxyForCURLWithoutPortPortIs3128()
 	{
 		$pp = new PP('http://example.com');
@@ -312,7 +380,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
             "Content-Length: $size\r\n\r\n$payload"
         ));
 
- 		$this->assertNotEmpty($pp->get_subject_index(2014, 'ug'));
+ 		$this->assertNotEmpty($pp->get_subject_index(2014, 'undergraduate'));
 	}
 
 	/**
@@ -639,6 +707,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
 	}
 
+
 	public function testReturnsArrayByDefault()
 	{
 		$mock = $this->getMock('ProgrammesPlant\API', array('guzzle_request'), array('http://example.com'));
@@ -659,3 +728,4 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	}
 
 }
+
