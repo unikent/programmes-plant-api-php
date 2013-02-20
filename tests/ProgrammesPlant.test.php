@@ -675,6 +675,74 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$this->assertTrue($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
 	}
 
+	public function testCacheDoesNotRefreshWhenUsingHeadersWeUseInProgrammesPlant()
+	{
+		$server = $this->getServer();
+
+		$pp = $this->setup_with_server();
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Cache-Control: public, max-age=3600\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload",
+
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		// Put a request into the cache
+		$pp->make_request('api/');
+
+		// This should get served out of the cache.
+		$pp->make_request('api/');
+
+		$this->assertEquals(1, count($server->getReceivedRequests()));
+
+		$this->assertTrue($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
+	public function testCacheDoesRefreshWhenUsingHeadersWeUseInProgrammesPlantIfExpired()
+	{
+		$server = $this->getServer();
+
+		$pp = $this->setup_with_server();
+		$pp->with_cache('file')->directory(static::$cache_directory);
+
+		$data = array('thing' => 'thing');
+		$payload = json_encode($data);
+
+		$server->enqueue(array(
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('-3601 seconds') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Cache-Control: public, max-age=3600\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload",
+
+			"HTTP/1.1 200 OK\r\n" .
+			"Date: " . Utils::getHttpDate('now') . "\r\n" .
+			"Last-Modified: " . Utils::getHttpDate('-10 hours') . "\r\n" .
+			"Content-Length: " . strlen($payload) . "\r\n\r\n$payload"
+		));
+
+		// Put a request into the cache
+		$pp->make_request('api/');
+
+		// This should get served out of the cache.
+		$pp->make_request('api/');
+
+		$this->assertEquals(2, count($server->getReceivedRequests()));
+
+		$this->assertFalse($pp->request->getResponse()->hasHeader('X-Guzzle-Cache'));
+	}
+
 	public function testCacheRefreshesWhenModificationDateIsChangedAndCacheHasExpired()
 	{
 		$server = $this->getServer();
