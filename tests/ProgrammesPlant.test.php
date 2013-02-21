@@ -1019,7 +1019,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	{	
 		return array(
 			array(
-				 mb_substr(json_encode(array('This' => 'That'), 0, -1)),
+				 mb_substr(json_encode(array('This' => 'That')), 0, -1),
 				'Syntax error, malformed JSON.'
 			),
 		);
