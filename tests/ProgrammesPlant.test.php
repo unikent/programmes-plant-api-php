@@ -1016,10 +1016,10 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	}
 
 	function json_decodeErrorsProvider()
-	{
+	{	
 		return array(
 			array(
-				mb_substr(json_encode(array('This' => 'That'), 0, -1)),
+				 mb_substr(json_encode(array('This' => 'That'), 0, -1)),
 				'Syntax error, malformed JSON.'
 			),
 		);
@@ -1032,7 +1032,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	{
 		$pp = new PP('http://example.com');
 
-		$this->setExpectedException('ProgrammesPlant\JSONDecode', 'We cannot decode invalid JSON - ' . $expected_message . "\nString: " . $string);
+		$this->setExpectedException('ProgrammesPlant\JSONDecode', 'We cannot decode invalid JSON,  json_decode reports:' . $expected_message . "\nString: " . $string);
 
 		$pp->json_decode($string);
 	}

@@ -327,9 +327,9 @@ class API
 	 */
 	public function json_decode($json, $as_array = false)
 	{
-		$json = json_decode($json, $as_array);
+		$decoded = json_decode($json, $as_array);
 
-		if (is_null($json))
+		if (is_null($decoded))
 		{
 			$error = '';
 
@@ -364,10 +364,10 @@ class API
 		        break;
     		}
 
-			throw new JSONDecode('We cannot decode invalid JSON - ' . $error . "\nString: " . $json);
+			throw new JSONDecode('We cannot decode invalid JSON,  json_decode reports:' . $error . "\nString: " . $json);
 		}
 
-		return $json;
+		return $decoded;
 	}
 
 	/**
