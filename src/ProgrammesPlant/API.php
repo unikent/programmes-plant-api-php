@@ -327,14 +327,47 @@ class API
 	 */
 	public function json_decode($json, $as_array = false)
 	{
-		$json = json_decode($json, $as_array);
+		$decoded = json_decode($json, $as_array);
 
-		if (is_null($json))
+		if (is_null($decoded))
 		{
-			throw new JSONDecode('We cannot decode invalid JSON');
+			$error = '';
+
+			switch (json_last_error()) 
+			{
+        		case JSON_ERROR_NONE:
+            		$error = 'No errors.';
+        		break;
+
+		        case JSON_ERROR_DEPTH:
+		            $error = 'Maximum stack depth exceeded.';
+		        break;
+
+		        case JSON_ERROR_STATE_MISMATCH:
+		            $error = 'Underflow or the modes mismatch.';
+		        break;
+
+		        case JSON_ERROR_CTRL_CHAR:
+		            $error = 'Unexpected control character found.';
+		        break;
+
+		        case JSON_ERROR_SYNTAX:
+		            $error = 'Syntax error, malformed JSON.';
+		        break;
+
+		        case JSON_ERROR_UTF8:
+		            $error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
+		        break;
+
+		        default:
+		            $error = 'Unknown error.';
+		        break;
+    		}
+
+			throw new JSONDecode('We cannot decode invalid JSON,  json_decode reports: ' . $error . "\nString: " . $json);
 		}
 
-		return $json;
+		return $decoded;
 	}
 
 	/**
