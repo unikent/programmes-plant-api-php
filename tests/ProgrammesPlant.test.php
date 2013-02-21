@@ -1032,7 +1032,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	{
 		$pp = new PP('http://example.com');
 
-		$this->setExpectedException('ProgrammesPlant\JSONDecode', 'We cannot decode invalid JSON,  json_decode reports:' . $expected_message . "\nString: " . $string);
+		$this->setExpectedException('ProgrammesPlant\JSONDecode', 'We cannot decode invalid JSON,  json_decode reports: ' . $expected_message . "\nString: " . $string);
 
 		$pp->json_decode($string);
 	}

@@ -364,7 +364,7 @@ class API
 		        break;
     		}
 
-			throw new JSONDecode('We cannot decode invalid JSON,  json_decode reports:' . $error . "\nString: " . $json);
+			throw new JSONDecode('We cannot decode invalid JSON,  json_decode reports: ' . $error . "\nString: " . $json);
 		}
 
 		return $decoded;
