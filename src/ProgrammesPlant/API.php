@@ -404,154 +404,158 @@ class API
 	 		throw new ProgrammesPlantException("Response was not valid JSON and could not be decoded.");
 	 	}
 
-	 }
+	}
 
-	 /**
-	  * Get a programme by ID from the API.
-	  * 
-	  * @param int $year The year of the programme to get.
-	  * @param string $level Either undergraduate or post-graduate.
-	  * @param int $id The ID of the programme to get.
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response The programme as an object.
-	  */ 
-	 public function get_programme($year, $level, $id, $as = 'object')
-	 {
-	 	if ($level != 'undergraduate' && $level != 'postgraduate')
-	 	{
-	 		throw new InvalidArgument("Invalid argument specified for get_programme - level must be undergraduate or postgraduate");
-	 	}
-
+	/**
+	 * Get a programme by ID from the API.
+	 * 
+	 * @param int $year The year of the programme to get.
+	 * @param string $level Either undergraduate or post-graduate.
+	 * @param int $id The ID of the programme to get.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response The programme as an object.
+	 */ 
+	public function get_programme($year, $level, $id, $as = 'object')
+	{
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_programme - level must be undergraduate or postgraduate");
+		}
 	 	return $this->make_request("$year/$level/programmes/$id", $as);
-	 }
+	}
 
-	 /**
-	  * Get the complete index of programmes from the API.
-	  * 
-	  * @param int $year The year of the programme index to get.
-	  * @param string $level Either undergraduate for post-graduate.
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response The programmes index as an object.
-	  */
-	 public function get_programmes_index($year, $level, $as = 'object')
-	 {
-	 	if ($level != 'undergraduate' && $level != 'postgraduate')
-	 	{
-	 		throw new InvalidArgument("Invalid argument specified for get_programmes_index - level must be undergraduate or postgraduate");
-	 	}
-
+	/**
+	 * Get the complete index of programmes from the API.
+	 * 
+	 * @param int $year The year of the programme index to get.
+	 * @param string $level Either undergraduate for post-graduate.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response The programmes index as an object.
+	 */
+	public function get_programmes_index($year, $level, $as = 'object')
+	{
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_programmes_index - level must be undergraduate or postgraduate");
+		}
 	 	return $this->make_request("$year/$level/programmes", $as);
-	 }
-	 
-	 /**
-	  * Get an index of subjects from the programmes plant API
-	  * 
-	  * @param int $year The year of programmes to get.
-	  * @param string $level Either undergraduate or post-graduate.
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return array $response The subject index as an array.
-	  */ 
-	 public function get_subject_index($year, $level, $as = 'object')
-	 {
-	 	if ($level != 'undergraduate' && $level != 'postgraduate')
-	 	{
-	 		throw new InvalidArgument("Invalid argument specified for get_subject_index - level must be undergraduate or postgraduate");
-	 	}
-
+	}
+	
+	/**
+	 * Get an index of subjects from the programmes plant API
+	 * 
+	 * @param int $year The year of programmes to get.
+	 * @param string $level Either undergraduate or post-graduate.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return array $response The subject index as an array.
+	 */ 
+	public function get_subject_index($year, $level, $as = 'object')
+	{
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_subject_index - level must be undergraduate or postgraduate");
+		}
 	 	return $this->make_request("$year/$level/subjects", $as);
-	 }
-	 
-	 /**
-	  * Get an "unpublished" preview programme from the Programmes Plant API
-	  * 
-	  * @param string $hash Unique identifier for preview snapshot.
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response The programme as an object.
-	  */ 
-	 public function get_preview_programme($hash, $as = 'object')
-	 {
-	 	return $this->make_request("preview/$hash", $as);
-	 }
-	 
-	 /**
-	  * Get subject categories list from the API.
-	  *
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response
-	  */ 
-	 public function get_subjectcategories($as = 'object')
-	 {
-	 	return $this->make_request("subjectcategories", $as);
-	 }
-	 
-	 /**
-	  * Get schools list from the API.
-	  *
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response
-	  */ 
-	 public function get_schools($as = 'object')
-	 {
-	 	return $this->make_request("schools", $as);
-	 }
-	 
-	 /**
-	  * Get faculties list from the API.
-	  * 
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response
-	  */ 
-	 public function get_faculties($as = 'object')
-	 {
-	 	return $this->make_request("faculties", $as);
-	 }
-	 
-	 /**
-	  * Get campuses list from the API.
-	  * 
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response
-	  */ 
-	 public function get_campuses($as = 'object')
-	 {
-	 	return $this->make_request("campuses", $as);
-	 }
-	 
-	 /**
-	  * Get subject leaflets from the API.
-	  *
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return object $response
-	  */ 
-	 public function get_subject_leaflets($as = 'object')
-	 {
-	 	return $this->make_request("leaflets", $as);
-	 }
-	 
-	 /**
-	  * 
-	  * 
-	  * @param int $year The year.
-	  * @param string $level Either undergraduate or post-graduate.
-	  * @param string $as Variable type to return - object, array or raw.
-	  * @return array $response The subject index as an array.
-	  */ 
-	 public function get_xcri_cap($year, $level, $as = 'raw')
-	 {
-	 	if ($level != 'undergraduate' && $level != 'postgraduate')
-	 	{
-	 		throw new InvalidArgument("Invalid argument specified for get_xcri_cap - level must be undergraduate or postgraduate");
-	 	}
-
-	 	//we want a gzipped feed
-	 	//$this->set_encoding();
-
+	}
+	
+	/**
+	 * Get an "unpublished" preview programme from the Programmes Plant API
+	 * 
+	 * @param string $hash Unique identifier for preview snapshot.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response The programme as an object.
+	 */ 
+	public function get_preview_programme($hash, $as = 'object')
+	{
+		return $this->make_request("preview/$hash", $as);
+	}
+	
+	/**
+	 * Get subject categories list from the API.
+	 *
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_subjectcategories($as = 'object')
+	{
+		return $this->make_request("subjectcategories", $as);
+	}
+	
+	/**
+	 * Get schools list from the API.
+	 *
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_schools($as = 'object')
+	{
+		return $this->make_request("schools", $as);
+	}
+	
+	/**
+	 * Get faculties list from the API.
+	 * 
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_faculties($as = 'object')
+	{
+		return $this->make_request("faculties", $as);
+	}
+	
+	/**
+	 * Get campuses list from the API.
+	 * 
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_campuses($as = 'object')
+	{
+		return $this->make_request("campuses", $as);
+	}
+	
+	/**
+	 * Get subject leaflets from the API.
+	 *
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_subject_leaflets($as = 'object')
+	{
+		return $this->make_request("leaflets", $as);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param int $year The year.
+	 * @param string $level Either undergraduate or post-graduate.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return array $response The subject index as an array.
+	 */ 
+	public function get_xcri_cap($year, $level, $as = 'raw')
+	{
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_xcri_cap - level must be undergraduate or postgraduate");
+		}
+		
+		//we want a gzipped feed
+		//$this->set_encoding();
+	 	
 	 	return $this->make_request("$year/$level/xcri-cap", $as);
-	 }
+	}
 
-	 public function set_encoding($encoding = "gzip"){
-	 	$this->guzzle_options['curl.options']['CURLOPT_ENCODING'] = $encoding;
-	 }
+	/**
+	 * Set the encoding of the response.
+	 * Note: calling this caused curl to fail with error 61 on my localhost, so not currently in use
+	 * 
+	 * @param $encoding This defaults to gzip. also, if an empty string is passed, CURL automatically defaults to all supported encoding types
+	 */
+	public function set_encoding($encoding = "gzip")
+	{
+		$this->guzzle_options['curl.options']['CURLOPT_ENCODING'] = $encoding;
+	}
 }
 
 class ProgrammesPlantException extends \Exception {}
