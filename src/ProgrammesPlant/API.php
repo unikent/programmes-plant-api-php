@@ -527,6 +527,31 @@ class API
 	 {
 	 	return $this->make_request("leaflets", $as);
 	 }
+	 
+	 /**
+	  * 
+	  * 
+	  * @param int $year The year.
+	  * @param string $level Either undergraduate or post-graduate.
+	  * @param string $as Variable type to return - object, array or raw.
+	  * @return array $response The subject index as an array.
+	  */ 
+	 public function get_xcri_cap($year, $level, $as = 'raw')
+	 {
+	 	if ($level != 'undergraduate' && $level != 'postgraduate')
+	 	{
+	 		throw new InvalidArgument("Invalid argument specified for get_xcri_cap - level must be undergraduate or postgraduate");
+	 	}
+
+	 	//we want a gzipped feed
+	 	//$this->set_encoding();
+
+	 	return $this->make_request("$year/$level/xcri-cap", $as);
+	 }
+
+	 public function set_encoding($encoding = "gzip"){
+	 	$this->guzzle_options['curl.options']['CURLOPT_ENCODING'] = $encoding;
+	 }
 }
 
 class ProgrammesPlantException extends \Exception {}
