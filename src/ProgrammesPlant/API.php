@@ -421,6 +421,7 @@ class API
 		{
 			throw new InvalidArgument("Invalid argument specified for get_programme - level must be undergraduate or postgraduate");
 		}
+
 	 	return $this->make_request("$year/$level/programmes/$id", $as);
 	}
 
@@ -476,9 +477,14 @@ class API
 	 * @param string $as Variable type to return - object, array or raw.
 	 * @return object $response
 	 */ 
-	public function get_subjectcategories($as = 'object')
+	public function get_subjectcategories($level = 'undergraduate', $as = 'object')
 	{
-		return $this->make_request("subjectcategories", $as);
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_subjectcategories - level must be undergraduate or postgraduate");
+		}
+
+		return $this->make_request("{$level}/subjectcategories", $as);
 	}
 	
 	/**
