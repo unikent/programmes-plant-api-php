@@ -851,70 +851,93 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	public function ReturnsMethodProvider()
 	{
 		return array(
-			array('get_programme', true),
-			array('get_programmes_index'),
-			array('get_subject_index'),
-			array('get_subjectcategories', false, true),
-			array('get_schools', false, true),
-			array('get_faculties', false, true),
-			array('get_campuses', false, true),
-			array('get_subject_leaflets', false, true),
-			array('get_preview_programme')
+			array('get_programme', array('year' => '2014', 'level' => 'undergraduate', 'id' => '123')),
+			array('get_programme', array('year' => '2014', 'level' => 'postgraduate', 'id' => '123')),
+			array('get_programmes_index', array('year' => '2014', 'level' => 'undergraduate')),
+			array('get_programmes_index', array('year' => '2014', 'level' => 'postgraduate')),
+			array('get_subject_index', array('year' => '2014', 'level' => 'undergraduate')),
+			array('get_subject_index', array('year' => '2014', 'level' => 'postgraduate')),
+			array('get_subjectcategories', array('level' => 'undergraduate')),
+			array('get_subjectcategories', array('level' => 'postgraduate')),
+			array('get_schools', array('single_pass' => true)),
+			array('get_faculties', array('single_pass' => true)),
+			array('get_campuses', array('single_pass' => true)),
+			array('get_subject_leaflets', array('single_pass' => true)),
+			array('get_preview_programme', array())
 		);
 	}
 
 	/**
 	 * @dataProvider ReturnsMethodProvider
 	 */
-	public function testMethodsReturnObjectByDefault($method, $id = false, $single_pass = false)
+	public function testMethodsReturnObjectByDefault($method, $params)
 	{
 		$this->setup_basic_payload();
 		$pp = $this->setup_with_server();
+
+		$defaults = array('level' => false, 'year' => false, 'id' => false, 'single_pass' => false);
+		$params = array_merge($defaults, $params);
 
 		if ($method == 'get_preview_programme')
 		{
 			$payload = $pp->{$method}(111);
 		}
-		elseif ($single_pass)
+		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}();
 		}
-		elseif ($id)
+		elseif ($params['year'] && $params['level'] && $params['id'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', $id);
+			$payload = $pp->{$method}($params['year'], $params['level'], $params['id']);
 		}
-		else 
+		elseif($params['year'] && $params['level'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate');
+			$payload = $pp->{$method}($params['year'], $params['level']);
+		}
+		elseif($params['year']){
+			$payload = $pp->{$method}($params['year']);
+		}
+		elseif($params['level']) 
+		{
+			$payload = $pp->{$method}($params['level']);
 		}
 
-		
 		$this->assertTrue(is_object($payload));
 	}
 
 	/**
 	 * @dataProvider ReturnsMethodProvider
 	 */
-	public function testMethodsReturnArray($method, $id = false, $single_pass = false)
+	public function testMethodsReturnArray($method, $params)
 	{
 		$this->setup_basic_payload();
 		$pp = $this->setup_with_server();
 		
+		$defaults = array('level' => false, 'year' => false, 'id' => false, 'single_pass' => false);
+		$params = array_merge($defaults, $params);
+
 		if ($method == 'get_preview_programme')
 		{
 			$payload = $pp->{$method}(111, 'array');
 		}
-		elseif ($single_pass)
+		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}('array');
 		}
-		elseif ($id)
+		elseif ($params['year'] && $params['level'] && $params['id'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'array');
+			$payload = $pp->{$method}($params['year'], $params['level'], $params['id'], 'array');
 		}
-		else 
+		elseif($params['year'] && $params['level'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', 'array');
+			$payload = $pp->{$method}($params['year'], $params['level'], 'array');
+		}
+		elseif($params['year']){
+			$payload = $pp->{$method}($params['year'], 'array');
+		}
+		elseif($params['level']) 
+		{
+			$payload = $pp->{$method}($params['level'], 'array');
 		}
 		
 		$this->assertTrue(is_array($payload));
@@ -923,28 +946,37 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	/**
 	 * @dataProvider ReturnsMethodProvider
 	 */
-	public function testMethodsReturnObject($method, $id = false, $single_pass = false)
+	public function testMethodsReturnObject($method, $params)
 	{
 		$this->setup_basic_payload();
 		$pp = $this->setup_with_server();
 		
+		$defaults = array('level' => false, 'year' => false, 'id' => false, 'single_pass' => false);
+		$params = array_merge($defaults, $params);
+
 		if ($method == 'get_preview_programme')
 		{
 			$payload = $pp->{$method}(111, 'object');
 		}
-		elseif ($single_pass)
+		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}('object');
 		}
-		elseif ($id)
+		elseif ($params['year'] && $params['level'] && $params['id'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'object');
+			$payload = $pp->{$method}($params['year'], $params['level'], $params['id'], 'object');
 		}
-		else 
+		elseif($params['year'] && $params['level'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', 'object');
+			$payload = $pp->{$method}($params['year'], $params['level'], 'object');
 		}
-
+		elseif($params['year']){
+			$payload = $pp->{$method}($params['year'], 'object');
+		}
+		elseif($params['level']) 
+		{
+			$payload = $pp->{$method}($params['level'], 'object');
+		}
 		
 		$this->assertTrue(is_object($payload));
 	}
@@ -952,28 +984,37 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 	/**
 	 * @dataProvider ReturnsMethodProvider
 	 */
-	public function testMethodsReturnRawJSON($method, $id = false, $single_pass = false)
+	public function testMethodsReturnRawJSON($method, $params)
 	{
 		$this->setup_basic_payload();
 		$pp = $this->setup_with_server();
 		
+		$defaults = array('level' => false, 'year' => false, 'id' => false, 'single_pass' => false);
+		$params = array_merge($defaults, $params);
+
 		if ($method == 'get_preview_programme')
 		{
 			$payload = $pp->{$method}(111, 'raw');
 		}
-		elseif ($single_pass)
+		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}('raw');
 		}
-		elseif ($id)
+		elseif ($params['year'] && $params['level'] && $params['id'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', $id, 'raw');
+			$payload = $pp->{$method}($params['year'], $params['level'], $params['id'], 'raw');
 		}
-		else 
+		elseif($params['year'] && $params['level'])
 		{
-			$payload = $pp->{$method}(2014, 'undergraduate', 'raw');
+			$payload = $pp->{$method}($params['year'], $params['level'], 'raw');
 		}
-
+		elseif($params['year']){
+			$payload = $pp->{$method}($params['year'], 'raw');
+		}
+		elseif($params['level']) 
+		{
+			$payload = $pp->{$method}($params['level'], 'raw');
+		}
 		
 		$this->assertNotNull(json_decode($payload));
 	}
