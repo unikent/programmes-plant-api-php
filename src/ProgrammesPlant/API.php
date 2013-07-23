@@ -466,9 +466,9 @@ class API
 	 * @param string $as Variable type to return - object, array or raw.
 	 * @return object $response The programme as an object.
 	 */ 
-	public function get_preview_programme($hash, $as = 'object')
+	public function get_preview_programme($level, $hash, $as = 'object')
 	{
-		return $this->make_request("preview/$hash", $as);
+		return $this->make_request("preview/$level/$hash", $as);
 	}
 	
 	/**
