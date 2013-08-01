@@ -530,6 +530,22 @@ class API
 	{
 		return $this->make_request("leaflets", $as);
 	}
+
+	/**
+	 * Get awards from the API.
+	 *
+	 * @param string $level 
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response
+	 */ 
+	public function get_awards($level = 'undergraduate', $as = 'object')
+	{
+		if ($level != 'undergraduate' && $level != 'postgraduate')
+		{
+			throw new InvalidArgument("Invalid argument specified for get_awards - level must be undergraduate or postgraduate");
+		}
+		return $this->make_request("{$level}/awards", $as);
+	}
 	
 	/**
 	 * 

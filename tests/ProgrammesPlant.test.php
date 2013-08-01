@@ -863,7 +863,9 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 			array('get_faculties', array('single_pass' => true)),
 			array('get_campuses', array('single_pass' => true)),
 			array('get_subject_leaflets', array('single_pass' => true)),
-			array('get_preview_programme', array('level' => 'undergraduate'))
+			array('get_preview_programme', array('level' => 'undergraduate')),
+			array('get_awards', array('level' => 'undergraduate')),
+			array('get_awards', array('level' => 'postgraduate'))
 		);
 	}
 
