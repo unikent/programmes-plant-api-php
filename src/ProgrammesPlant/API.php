@@ -470,6 +470,18 @@ class API
 	{
 		return $this->make_request("preview/$level/$hash", $as);
 	}
+
+	/**
+	 * Get a simpleview programme from the Programmes Plant API
+	 * 
+	 * @param string $hash Unique identifier for simpleview snapshot.
+	 * @param string $as Variable type to return - object, array or raw.
+	 * @return object $response The programme as an object.
+	 */ 
+	public function get_simpleview_programme($level, $hash, $as = 'object')
+	{
+		return $this->make_request("preview/$level/$hash", $as);
+	}
 	
 	/**
 	 * Get subject categories list from the API.

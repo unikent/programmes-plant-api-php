@@ -864,6 +864,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 			array('get_campuses', array('single_pass' => true)),
 			array('get_subject_leaflets', array('single_pass' => true)),
 			array('get_preview_programme', array('level' => 'undergraduate')),
+			array('get_simpleview_programme', array('level' => 'undergraduate')),
 			array('get_awards', array('level' => 'undergraduate')),
 			array('get_awards', array('level' => 'postgraduate'))
 		);
@@ -881,6 +882,10 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$params = array_merge($defaults, $params);
 
 		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}($params['level'], 111);
+		}
+		elseif ($method == 'get_simpleview_programme')
 		{
 			$payload = $pp->{$method}($params['level'], 111);
 		}
@@ -922,6 +927,10 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		{
 			$payload = $pp->{$method}($params['level'], 111, 'array');
 		}
+		elseif ($method == 'get_simpleview_programme')
+		{
+			$payload = $pp->{$method}($params['level'], 111, 'array');
+		}
 		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}('array');
@@ -960,6 +969,10 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		{
 			$payload = $pp->{$method}($params['level'], 111, 'object');
 		}
+		elseif ($method == 'get_simpleview_programme')
+		{
+			$payload = $pp->{$method}($params['level'], 111, 'object');
+		}
 		elseif ($params['single_pass'])
 		{
 			$payload = $pp->{$method}('object');
@@ -995,6 +1008,10 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 		$params = array_merge($defaults, $params);
 
 		if ($method == 'get_preview_programme')
+		{
+			$payload = $pp->{$method}($params['level'], 111, 'raw');
+		}
+		elseif ($method == 'get_simpleview_programme')
 		{
 			$payload = $pp->{$method}($params['level'], 111, 'raw');
 		}
