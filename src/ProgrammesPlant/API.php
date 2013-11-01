@@ -538,9 +538,9 @@ class API
 	 * @param string $as Variable type to return - object, array or raw.
 	 * @return object $response
 	 */ 
-	public function get_subject_leaflets($as = 'object')
+	public function get_subject_leaflets($year, $level, $as = 'object')
 	{
-		return $this->make_request("leaflets", $as);
+		return $this->make_request("$level/$year/leaflets", $as);
 	}
 
 	/**
