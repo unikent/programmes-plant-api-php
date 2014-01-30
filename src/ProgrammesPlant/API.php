@@ -231,7 +231,7 @@ class API
 
 	    					if($can){
 	    						try {
-	    							$this->json_decode($response->getBody(true));
+	    							API::json_decode($response->getBody(true));
 	    						} catch (JSONDecode $e) {
 	    							$can = false;
 	    						}
@@ -345,7 +345,7 @@ class API
 	 * @param bool $as_array Return as array if true.
 	 * @return array|object $json The JSON converted.
 	 */
-	public function json_decode($json, $as_array = false)
+	public static function json_decode($json, $as_array = false)
 	{
 		$decoded = json_decode($json, $as_array);
 
@@ -405,7 +405,7 @@ class API
 
 			if ($as == 'array')
 			{
-				return $this->json_decode($payload, true);
+				return static::json_decode($payload, true);
 			}
 			else if ($as == 'raw')
 			{
@@ -414,7 +414,7 @@ class API
 			// By default return an object.
 			else
 			{
-				return $this->json_decode($payload);
+				return static::json_decode($payload);
 			}
 		}
 		
