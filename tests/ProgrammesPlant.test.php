@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Europe/London');
 
 use \ProgrammesPlant\API as PP;
 
@@ -291,7 +292,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 
 		// Simulate the events for the cache object.
 		$request = new Request('GET', 'http://foo.com');
-		$response = new Response(200, array(), 'Foo');
+		$response = new Response(200, array(), '["Foo"]');
 
 		// Fake the request.
 		$pp->cache_plugin->onRequestBeforeSend(
@@ -319,11 +320,47 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
         // [0] => HTTP Code, [1] => HTTP Headers, [2] => Body
         $this->assertEquals(200, $data[0]);
         $this->assertInternalType('array', $data[1]);
-        $this->assertEquals('Foo', $data[2]);
+        $this->assertEquals('["Foo"]', $data[2]);
 	}
 
 	public function testRequestIsCachedWhenResponseIsCacheableWithFileCache()
 	{
+		$pp = new PP('http://example.com');
+		$pp->with_cache('file')->directory(static::$cache_directory); 
+		$pp->prepare();
+
+		// Simulate the events for the cache object.
+		$request = new Request('GET', 'http://foo.com');
+		$response = new Response(200, array(), '["Foo"]');
+
+		// Fake the request.
+		$pp->cache_plugin->onRequestBeforeSend(
+			new Event(array(
+            	'request' => $request
+        	))
+		);
+
+		// Fake the response to that request.
+        $pp->cache_plugin->onRequestSent(
+        	new Event(array(
+        		'request'  => $request,
+            	'response' => $response
+        	))
+        );
+
+        $key_provider = new \Guzzle\Plugin\Cache\DefaultCacheKeyProvider();
+		$data = $pp->cache_object->fetch($key_provider->getCacheKey($request));
+
+        $this->assertNotEmpty($data, "Cache did not return any data on a request.");
+
+        // Assert we are caching the response as we put it in.
+        // [0] => HTTP Code, [1] => HTTP Headers, [2] => Body
+        $this->assertEquals(200, $data[0]);
+        $this->assertInternalType('array', $data[1]);
+        $this->assertEquals('["Foo"]', $data[2]);
+	}
+
+	public function testEnsureNonJsonIsntCached(){
 		$pp = new PP('http://example.com');
 		$pp->with_cache('file')->directory(static::$cache_directory); 
 		$pp->prepare();
@@ -350,13 +387,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
         $key_provider = new \Guzzle\Plugin\Cache\DefaultCacheKeyProvider();
 		$data = $pp->cache_object->fetch($key_provider->getCacheKey($request));
 
-        $this->assertNotEmpty($data, "Cache did not return any data on a request.");
-
-        // Assert we are caching the response as we put it in.
-        // [0] => HTTP Code, [1] => HTTP Headers, [2] => Body
-        $this->assertEquals(200, $data[0]);
-        $this->assertInternalType('array', $data[1]);
-        $this->assertEquals('Foo', $data[2]);
+        $this->assertEmpty($data, "Non json responses should not be cached.");
 	}
 
 	/**

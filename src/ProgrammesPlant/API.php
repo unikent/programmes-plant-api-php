@@ -4,8 +4,10 @@ namespace ProgrammesPlant;
 
 use Guzzle\Http\Client;
 use Guzzle\Http\Message\Response;
+use Guzzle\Http\Message\Request;
 use Guzzle\Cache\DoctrineCacheAdapter;
 use Guzzle\Plugin\Cache\CachePlugin;
+use Guzzle\Plugin\Cache\CallbackCanCacheStrategy;
 
 use Doctrine\Common\Cache\FileCache;
 use Doctrine\Common\Cache\FilesystemCache;
@@ -219,7 +221,25 @@ class API
 
 				$this->cache_plugin = new CachePlugin(
 					array(
-	    				'adapter' => $adapter
+	    				'adapter' => $adapter,
+	    				'can_cache' => new CallbackCanCacheStrategy(function(Request $request){
+	    					
+	    					return $request->canCache();
+
+	    				}, function(Response $response){
+	    					$can = $response->isSuccessful() && $response->canCache();
+
+	    					if($can){
+	    						try {
+	    							API::json_decode($response->getBody(true));
+	    						} catch (JSONDecode $e) {
+	    							$can = false;
+	    						}
+	    						
+	    					}
+
+	    					return $can;
+	    				})
 					)
 				);
 
@@ -325,7 +345,7 @@ class API
 	 * @param bool $as_array Return as array if true.
 	 * @return array|object $json The JSON converted.
 	 */
-	public function json_decode($json, $as_array = false)
+	public static function json_decode($json, $as_array = false)
 	{
 		$decoded = json_decode($json, $as_array);
 
@@ -385,7 +405,7 @@ class API
 
 			if ($as == 'array')
 			{
-				return $this->json_decode($payload, true);
+				return static::json_decode($payload, true);
 			}
 			else if ($as == 'raw')
 			{
@@ -394,7 +414,7 @@ class API
 			// By default return an object.
 			else
 			{
-				return $this->json_decode($payload);
+				return static::json_decode($payload);
 			}
 		}
 		
