@@ -293,6 +293,16 @@ class API
 		// Attempt to respond with cache or throws an error.
 		catch (\Guzzle\Http\Exception\ServerErrorResponseException $e)
 		{
+			// Catch 501 (Not implemented) and thow a 'missing data' exception
+			// This is because the programmes plant will thow a 501 in cases where 
+			// it cannot find all the data needed to make a course's api.
+			switch ($e->getResponse()->getStatusCode()) 
+			{
+				case 501:
+					throw new ProgrammesPlantMissingDataException("$url not found, attempting to get " . $this->api_target . '/' . $url);
+				break;
+			}
+
 			// Obtain from cache.
 			if ($this->cache)
 			{
@@ -627,3 +637,5 @@ class ProxyNotFound extends \Exception {}
 class JSONDecode extends \Exception {}
 
 class ProgrammesPlantNotFoundException extends \Exception {}
+
+class ProgrammesPlantMissingDataException extends \Exception {}
