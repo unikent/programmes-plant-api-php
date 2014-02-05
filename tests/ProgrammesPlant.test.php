@@ -476,7 +476,7 @@ class ProgrammesPlantTest extends \Guzzle\Tests\GuzzleTestCase
 			array(
 				"HTTP/1.1 500 Internal Server Error\r\n",
 				'ProgrammesPlant\ProgrammesPlantRequestException',
-				'Request failed for http://127.0.0.1:8124/thing/  - no cache.'
+				'Request failed for http://127.0.0.1:8124/thing/ - no cache.'
 			),
 		));
 	}
