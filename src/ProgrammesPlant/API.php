@@ -299,7 +299,7 @@ class API
 			switch ($e->getResponse()->getStatusCode()) 
 			{
 				case 501:
-					throw new ProgrammesPlantMissingDataException("$url not found, attempting to get " . $this->api_target . '/' . $url);
+					throw new ProgrammesPlantMissingDataException("Request failed for " . $this->api_target . '/' . $url . ' - Programmes Plant reported missing data');
 				break;
 			}
 
@@ -310,14 +310,14 @@ class API
 
 				if (! $cached)
 				{
-					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - attempted to serve from cache but not found.');
+					throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ' - attempted to serve from cache but not found.');
 				}
 
 				return new \Guzzle\Http\Message\Response($cached[0], $cached[1], $cached[2]);
 			}
 			else
 			{
-				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . '  - no cache.');
+				throw new ProgrammesPlantRequestException('Request failed for ' . $this->api_target . '/' . $url . ' - no cache.');
 			}
 		}
 
