@@ -597,7 +597,7 @@ class API
 		//we want a gzipped feed
 		//$this->set_encoding();
 	 	
-	 	return $this->make_request("$year/$level/xcri-cap", $as);
+	 	return $this->make_request("xcri-cap", $as);
 	}
 
 	/**
